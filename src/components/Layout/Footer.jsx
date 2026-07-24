@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   // Número de WhatsApp con código de país (Cuba: +53)
-  const whatsappNumber = '5354330343'; // 54 330343 / 53 785749
+  const whatsappNumber = '5359342808'; // 54 330343 / 53 785749
   const whatsappLink = `https://wa.me/${whatsappNumber}`;
 
   return (

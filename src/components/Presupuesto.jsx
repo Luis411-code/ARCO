@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 
 const Presupuesto = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const servicioId = searchParams.get('servicio');
 
   const [paso, setPaso] = useState(1);
@@ -195,8 +196,7 @@ const Presupuesto = () => {
   };
 
   const handleVolver = () => {
-    setPaso(1);
-    setServicioSeleccionado(null);
+    navigate('/servicios'); // 👈 REDIRIGE A SERVICIOS
   };
 
   const handleSubmit = (e) => {
@@ -307,7 +307,7 @@ const Presupuesto = () => {
             onClick={handleVolver}
             className="px-6 py-2.5 rounded-lg font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
           >
-            ← Volver
+            ← Volver a Servicios
           </button>
           <button
             type="submit"
@@ -393,7 +393,7 @@ const Presupuesto = () => {
               onClick={handleVolver}
               className="mt-2 text-sm text-secondary hover:text-secondary/70 transition-colors"
             >
-              ← Volver a la lista de servicios
+              ← Volver a Servicios
             </button>
           )}
         </motion.div>
