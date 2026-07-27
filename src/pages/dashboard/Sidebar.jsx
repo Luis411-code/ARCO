@@ -1,3 +1,4 @@
+// src/pages/dashboard/Sidebar.jsx
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
@@ -22,7 +23,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
     >
       <div className="flex items-center justify-center h-20 border-b border-white/10">
         <Link to="/dashboard" className="flex items-center gap-3">
-          <img src="/logo.svg" alt="ARCO" className="w-10 h-10" />
+          <img src="/logo.png" alt="ARCO" className="h-10 w-auto" />
           {isOpen && (
             <motion.span 
               initial={{ opacity: 0 }}

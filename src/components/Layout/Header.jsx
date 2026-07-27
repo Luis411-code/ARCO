@@ -1,3 +1,4 @@
+// src/components/Layout/Header.jsx
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 
@@ -8,6 +9,7 @@ const Header = () => {
   const navItems = [
     { path: '/', label: 'Inicio' },
     { path: '/servicios', label: 'Servicios' },
+    { path: '/presupuesto', label: 'Presupuesto' },
     { path: '/contacto', label: 'Contacto' },
     { path: '/about', label: 'Nosotros' }
   ];
@@ -18,12 +20,12 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-primary shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          {/* Logo - Sin rotación, solo un sutil efecto de escala */}
+          {/* Logo - Con logo real */}
           <Link to="/" className="flex items-center space-x-3 group">
             <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="ARCO"
-              className="w-12 h-12 transition-transform duration-300 group-hover:scale-105"
+              className="h-12 w-auto transition-transform duration-300 group-hover:scale-105"
             />
             <span className="hidden sm:inline text-xl font-bold text-white transition-colors duration-300 group-hover:text-secondary">
               ARCO

@@ -37,7 +37,7 @@ const LoginAdmin = () => {
         className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl"
       >
         <div className="text-center mb-8">
-          <img src="/logo.svg" alt="ARCO" className="w-16 h-16 mx-auto" />
+          <img src="/logo.png" alt="ARCO" className="h-16 w-auto mx-auto" />
           <h1 className="text-2xl font-bold text-primary mt-4">Panel de Administración</h1>
           <p className="text-gray-500 text-sm">Accede para gestionar tu sitio web</p>
         </div>

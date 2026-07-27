@@ -1,6 +1,7 @@
+// src/components/HeroVisualLite.jsx
 import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom'; // 👈 IMPORTANTE: usar Link de React Router
+import { Link } from 'react-router-dom';
 
 const HeroVisualLite = () => {
   const canvasRef = useRef(null);
@@ -92,11 +93,23 @@ const HeroVisualLite = () => {
 
   return (
     <section className="relative w-full h-screen flex items-center bg-gradient-to-br from-slate-900 via-primary to-slate-800 overflow-hidden">
-      {/* Canvas de fondo */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
       
-      {/* Contenido centrado */}
       <div className="relative z-10 container mx-auto px-4 text-center">
+        {/* Logo ARCO en el Hero */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-8"
+        >
+          <img 
+            src="/logo.png" 
+            alt="ARCO" 
+            className="h-16 md:h-20 w-auto mx-auto drop-shadow-2xl"
+          />
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -133,30 +146,23 @@ const HeroVisualLite = () => {
           transition={{ delay: 0.45, duration: 0.6 }}
           className="flex flex-wrap justify-center gap-4 mt-8"
         >
-          {/* ===== BOTÓN CORREGIDO: Link de React Router ===== */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Link
+            to="/servicios"
+            className="bg-secondary text-primary px-10 py-4 rounded-full font-bold text-base md:text-lg shadow-2xl shadow-secondary/30 hover:shadow-secondary/50 transition-all hover:scale-105 inline-flex items-center gap-3"
           >
-            <Link
-              to="/servicios"
-              className="relative overflow-hidden group bg-gradient-to-r from-secondary to-yellow-400 text-primary px-10 py-4 rounded-full font-bold text-base md:text-lg shadow-2xl shadow-secondary/30 hover:shadow-secondary/50 transition-all inline-flex items-center gap-3"
-            >
-              {/* Efecto de brillo */}
-              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-              
-              {/* Contenido del botón */}
-              <span className="relative z-10 flex items-center gap-2">
-                Ver Servicios
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </span>
-            </Link>
-          </motion.div>
+            <span>Ver Servicios</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+          <Link
+            to="/contacto"
+            className="bg-white/10 backdrop-blur-sm text-white px-10 py-4 rounded-full font-semibold border border-white/30 hover:bg-white/20 transition-all"
+          >
+            Contáctanos
+          </Link>
         </motion.div>
 
-        {/* Scroll indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

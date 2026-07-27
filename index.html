@@ -5,10 +5,9 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ARCO - Publicidad y Comunicación Gráfica</title>
-    <meta name="description" content="ARCO: Publicidad y Comunicación Gráfica en Holguín. Cartelería, señalética, impresión y diseño. Calidad y garantía en cada proyecto." />
+    <meta name="description" content="ARCO: Publicidad y Comunicación Gráfica en Holguín. Cartelería, señalética, impresión y diseño." />
     
     <style>
-      /* ===== RESET Y FONDO DE RESPALDO ===== */
       * {
         margin: 0;
         padding: 0;
@@ -53,8 +52,8 @@
       }
 
       .preloader-icon {
-        width: 80px;
         height: 80px;
+        width: auto;
         animation: pulse-icon 1.5s ease-in-out infinite;
         filter: drop-shadow(0 0 30px rgba(240, 180, 41, 0.15));
       }
@@ -107,7 +106,7 @@
   <body>
     <!-- PRELOADER -->
     <div id="preloader">
-      <img src="/logo.svg" alt="ARCO" class="preloader-icon" />
+      <img src="/logo.png" alt="ARCO" class="preloader-icon" />
       <div class="preloader-number">
         <span id="progressNumber">0</span><span class="percent">%</span>
       </div>
@@ -122,17 +121,6 @@
 
     <script>
       (function() {
-        // ===== CONTROL DE EJECUCIÓN ÚNICA =====
-        if (window._preloaderExecuted) {
-          // Si ya se ejecutó, ocultar preloader inmediatamente
-          const preloader = document.getElementById('preloader');
-          const root = document.getElementById('root');
-          if (preloader) preloader.classList.add('hidden');
-          if (root) root.classList.add('visible');
-          return;
-        }
-        window._preloaderExecuted = true;
-
         const preloader = document.getElementById('preloader');
         const progressBar = document.getElementById('progressBar');
         const progressNumber = document.getElementById('progressNumber');
