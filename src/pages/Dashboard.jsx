@@ -47,7 +47,6 @@ const Dashboard = () => {
     navigate('/admin/login');
   };
 
-  // ===== REFRESCAR DATOS LOCAL =====
   const handleRefresh = () => {
     setRefreshing(true);
 
@@ -80,7 +79,6 @@ const Dashboard = () => {
     }, 600);
   };
 
-  // ===== SINCRONIZAR A MONGODB =====
   const handleSyncToCloud = async () => {
     setSyncing(true);
     const result = await syncToMongoDB();
@@ -92,7 +90,6 @@ const Dashboard = () => {
     setSyncing(false);
   };
 
-  // ===== CARGAR DESDE MONGODB =====
   const handleLoadFromCloud = async () => {
     setSyncing(true);
     const result = await loadFromMongoDB();

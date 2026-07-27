@@ -1,3 +1,4 @@
+// src/pages/LoginAdmin.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -19,7 +20,6 @@ const LoginAdmin = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Credenciales por defecto (puedes cambiarlas)
     if (credentials.email === 'admin@arco.cu' && credentials.password === 'admin123') {
       localStorage.setItem('admin_logged_in', 'true');
       navigate('/dashboard');

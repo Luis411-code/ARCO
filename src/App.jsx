@@ -20,42 +20,94 @@ function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-grow pt-20">
-          <Routes>
-            <Route path="/" element={
-              <>
-                <Home />
-                <Ubicacion />
-              </>
-            } />
-            <Route path="/servicios" element={<Servicios />} />
-            <Route path="/contacto" element={<Contacto />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/presupuesto" element={<Presupuesto />} />
-            <Route path="/testimonio" element={<TestimonioForm />} />
-            
-            {/* Rutas de admin con lazy loading */}
-            <Route path="/admin/login" element={
-              <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Cargando...</div>}>
-                <LoginAdmin />
-              </Suspense>
-            } />
-            <Route path="/dashboard" element={
-              <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Cargando...</div>}>
-                <Dashboard />
-              </Suspense>
-            } />
-            <Route path="/dashboard/*" element={
-              <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Cargando...</div>}>
-                <Dashboard />
-              </Suspense>
-            } />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+      <Routes>
+        {/* ============================================================
+            RUTAS PÚBLICAS - CON HEADER Y FOOTER
+            ============================================================ */}
+        <Route path="/" element={
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow pt-20">
+              <Home />
+              <Ubicacion />
+            </main>
+            <Footer />
+          </div>
+        } />
+        
+        <Route path="/servicios" element={
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow pt-20">
+              <Servicios />
+            </main>
+            <Footer />
+          </div>
+        } />
+        
+        <Route path="/contacto" element={
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow pt-20">
+              <Contacto />
+            </main>
+            <Footer />
+          </div>
+        } />
+        
+        <Route path="/about" element={
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow pt-20">
+              <About />
+            </main>
+            <Footer />
+          </div>
+        } />
+        
+        <Route path="/presupuesto" element={
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow pt-20">
+              <Presupuesto />
+            </main>
+            <Footer />
+          </div>
+        } />
+        
+        <Route path="/testimonio" element={
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow pt-20">
+              <TestimonioForm />
+            </main>
+            <Footer />
+          </div>
+        } />
+
+        {/* ============================================================
+            RUTAS DE ADMIN - SIN HEADER Y SIN FOOTER
+            ============================================================ */}
+        <Route path="/admin/login" element={
+          <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-primary">
+              <div className="text-white text-xl">Cargando...</div>
+            </div>
+          }>
+            <LoginAdmin />
+          </Suspense>
+        } />
+        
+        <Route path="/dashboard/*" element={
+          <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+              <div className="text-primary text-xl">Cargando panel...</div>
+            </div>
+          }>
+            <Dashboard />
+          </Suspense>
+        } />
+      </Routes>
     </BrowserRouter>
   );
 }
