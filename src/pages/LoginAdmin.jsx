@@ -60,7 +60,7 @@ const LoginAdmin = () => {
               onChange={handleInputChange}
               required
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-              placeholder="admin@arco.cu"
+              
             />
           </div>
           <div>
@@ -83,9 +83,7 @@ const LoginAdmin = () => {
           </button>
         </form>
 
-        <p className="text-xs text-gray-400 text-center mt-4">
-          Credenciales por defecto: admin@arco.cu / admin123
-        </p>
+        
       </motion.div>
     </div>
   );
