@@ -3,10 +3,11 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  // Si usas GitHub Pages, esto sería '/ARCO/', pero para Vercel no hace falta
+  // base: '/',
   server: {
     hmr: {
-      overlay: false // Desactiva el overlay de errores (opcional)
+      overlay: false
     }
-  },
-  publicDir: 'public', // Asegura que Vite sirva los archivos de public/
+  }
 })

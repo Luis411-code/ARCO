@@ -1,0 +1,78 @@
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+
+const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
+  const menuItems = [
+    { id: 'estadisticas', icon: '📊', label: 'Estadísticas' },
+    { id: 'hero', icon: '🏠', label: 'Sección Hero' },
+    { id: 'servicios-destacados', icon: '🎯', label: 'Servicios Destacados' },
+    { id: 'servicios', icon: '📋', label: 'Servicios' },
+    { id: 'testimonios', icon: '💬', label: 'Testimonios' },
+    { id: 'nosotros', icon: 'ℹ️', label: 'Sobre Nosotros' },
+    { id: 'mensajes', icon: '✉️', label: 'Mensajes' },
+    { id: 'configuracion', icon: '⚙️', label: 'Configuración' },
+  ];
+
+  return (
+    <motion.aside 
+      initial={{ width: isOpen ? 280 : 80 }}
+      animate={{ width: isOpen ? 280 : 80 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="bg-slate-900 h-screen flex-shrink-0 overflow-hidden shadow-lg z-20"
+    >
+      <div className="flex items-center justify-center h-20 border-b border-white/10">
+        <Link to="/dashboard" className="flex items-center gap-3">
+          <img src="/logo.svg" alt="ARCO" className="w-10 h-10" />
+          {isOpen && (
+            <motion.span 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="text-white font-bold text-xl"
+            >
+              ARCO Admin
+            </motion.span>
+          )}
+        </Link>
+      </div>
+
+      <nav className="mt-6 px-3">
+        {menuItems.map((item) => (
+          <motion.button
+            key={item.id}
+            whileHover={{ x: 4 }}
+            onClick={() => setActiveTab(item.id)}
+            data-tab={item.id}
+            className={`
+              w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
+              ${activeTab === item.id 
+                ? 'bg-secondary/20 text-secondary' 
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }
+            `}
+          >
+            <span className="text-xl">{item.icon}</span>
+            {isOpen && (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                {item.label}
+              </motion.span>
+            )}
+          </motion.button>
+        ))}
+      </nav>
+
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-all"
+      >
+        {isOpen ? '◀' : '▶'}
+      </button>
+    </motion.aside>
+  );
+};
+
+export default Sidebar;

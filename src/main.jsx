@@ -2,10 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
+import { AppProvider } from './context/AppContext';
 
 const root = document.getElementById('root');
 
-// Si el preloader ya está oculto, asegurar que root sea visible
 const preloader = document.getElementById('preloader');
 if (preloader && preloader.classList.contains('hidden')) {
   root.classList.add('visible');
@@ -13,6 +13,8 @@ if (preloader && preloader.classList.contains('hidden')) {
 
 ReactDOM.createRoot(root).render(
   <React.StrictMode>
-    <App />
+    <AppProvider>
+      <App />
+    </AppProvider>
   </React.StrictMode>
 );

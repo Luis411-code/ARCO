@@ -1,16 +1,17 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { useAppContext } from '../context/AppContext';
 
 const Contacto = () => {
+  const { addMensaje } = useAppContext();
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
     telefono: '',
     mensaje: ''
   });
-
-  // ===== NÚMERO DE WHATSAPP =====
-  const WHATSAPP_NUMBER = '5359342808';
+  const [enviado, setEnviado] = useState(false);
+  const [cargando, setCargando] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,9 +21,7 @@ const Contacto = () => {
     });
   };
 
-  // ===== VALIDACIÓN DE TELÉFONO: SOLO NÚMEROS Y + =====
   const handlePhoneChange = (e) => {
-    // Elimina cualquier caracter que no sea número, + o espacio
     const value = e.target.value.replace(/[^0-9+ ]/g, '');
     setFormData({
       ...formData,
@@ -32,17 +31,21 @@ const Contacto = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setCargando(true);
 
-    const mensaje = `Hola ARCO, vengo de su página web:%0A%0A` +
-      `📌 *Nuevo mensaje de contacto*%0A` +
-      `%0A` +
-      `👤 *Nombre:* ${formData.nombre}%0A` +
-      `📧 *Email:* ${formData.email}%0A` +
-      `📱 *Teléfono:* ${formData.telefono || 'No especificado'}%0A` +
-      `%0A` +
-      `📝 *Mensaje:*%0A${formData.mensaje}`;
+    // ===== GUARDAR MENSAJE EN EL CONTEXTO (DASHBOARD) =====
+    addMensaje({
+      nombre: formData.nombre,
+      email: formData.email,
+      telefono: formData.telefono || 'No especificado',
+      mensaje: formData.mensaje
+    });
 
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${mensaje}`, '_blank');
+    // ===== MOSTRAR CONFIRMACIÓN =====
+    setCargando(false);
+    setEnviado(true);
+    setFormData({ nombre: '', email: '', telefono: '', mensaje: '' });
+    setTimeout(() => setEnviado(false), 5000);
   };
 
   return (
@@ -137,68 +140,77 @@ const Contacto = () => {
             <div className="bg-white rounded-2xl p-8 shadow-md border border-gray-100">
               <h3 className="text-xl font-bold text-primary mb-6">Envíanos un Mensaje</h3>
               
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
-                  <input 
-                    type="text" 
-                    name="nombre"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                    placeholder="Tu nombre"
-                  />
+              {enviado ? (
+                <div className="bg-green-50 text-green-700 p-6 rounded-xl text-center">
+                  <div className="text-4xl mb-3">✅</div>
+                  <p className="font-semibold">¡Mensaje enviado con éxito!</p>
+                  <p className="text-sm mt-2">Hemos recibido tu mensaje. Te responderemos pronto.</p>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                  <input 
-                    type="email" 
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                    placeholder="tu@email.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                  <input 
-                    type="tel" 
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handlePhoneChange} // 👈 VALIDACIÓN
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                    placeholder="+53 5XXXXXXXX"
-                    pattern="[0-9+ ]+"
-                    title="Solo números y el signo +"
-                  />
-                  <p className="text-xs text-gray-400 mt-1">Solo números y el signo +</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje *</label>
-                  <textarea 
-                    name="mensaje"
-                    value={formData.mensaje}
-                    onChange={handleChange}
-                    required
-                    rows="4"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                    placeholder="Cuéntanos sobre tu proyecto..."
-                  />
-                </div>
-
-                <button 
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-primary to-blue-700 text-white py-3.5 rounded-lg font-semibold transition-all transform hover:scale-[1.02] hover:shadow-lg shadow-md text-base"
-                >
-                  Enviar Mensaje
-                </button>
-              </form>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                    <input 
+                      type="text" 
+                      name="nombre"
+                      value={formData.nombre}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
+                      placeholder="Tu nombre"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input 
+                      type="email" 
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
+                      placeholder="tu@email.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                    <input 
+                      type="tel" 
+                      name="telefono"
+                      value={formData.telefono}
+                      onChange={handlePhoneChange}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
+                      placeholder="+53 5XXXXXXXX"
+                      pattern="[0-9+ ]+"
+                      title="Solo números y el signo +"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Solo números y el signo +</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje *</label>
+                    <textarea 
+                      name="mensaje"
+                      value={formData.mensaje}
+                      onChange={handleChange}
+                      required
+                      rows="4"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
+                      placeholder="Cuéntanos sobre tu proyecto..."
+                    />
+                  </div>
+                  <button 
+                    type="submit"
+                    disabled={cargando}
+                    className={`w-full py-3.5 rounded-lg font-semibold transition-all transform hover:scale-[1.02] hover:shadow-lg shadow-md text-base ${
+                      cargando 
+                        ? 'bg-gray-400 cursor-not-allowed' 
+                        : 'bg-gradient-to-r from-primary to-blue-700 text-white'
+                    }`}
+                  >
+                    {cargando ? 'Enviando...' : 'Enviar Mensaje'}
+                  </button>
+                </form>
+              )}
             </div>
           </motion.div>
         </div>

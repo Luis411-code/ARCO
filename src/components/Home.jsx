@@ -3,8 +3,16 @@ import { useInView } from 'react-intersection-observer';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import HeroVisualLite from './HeroVisualLite';
+import { useAppContext } from '../context/AppContext';
 
 const Home = () => {
+  const { 
+    servicios, 
+    testimonios, 
+    configuracion,
+    serviciosDestacados
+  } = useAppContext();
+
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1
@@ -29,6 +37,12 @@ const Home = () => {
     }
   }, [inView]);
 
+  // ===== FILTRAR SOLO TESTIMONIOS APROBADOS =====
+  const testimoniosAprobados = testimonios.filter(t => t.aprobado !== false);
+
+  // ===== SERVICIOS DESTACADOS (usar los del contexto) =====
+  const destacados = serviciosDestacados || [];
+
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
     visible: { opacity: 1, y: 0 }
@@ -41,7 +55,7 @@ const Home = () => {
 
   return (
     <div className="overflow-hidden">
-      {/* ===== HERO - PANTALLA COMPLETA ===== */}
+      {/* ===== HERO CON ANIMACIÓN 3D ===== */}
       <HeroVisualLite />
 
       {/* ===== SECCIÓN "SOBRE NOSOTROS" ===== */}
@@ -56,17 +70,15 @@ const Home = () => {
           >
             <span className="text-secondary font-semibold text-sm uppercase tracking-wider">Sobre nosotros</span>
             <h2 className="text-3xl md:text-4xl font-bold text-primary mt-2 mb-4">
-              Expertos en Comunicación Visual
+              {configuracion.sobreNosotros?.titulo || 'Expertos en Comunicación Visual'}
             </h2>
             <p className="text-gray-600 leading-relaxed">
-              En ARCO transformamos ideas en soluciones gráficas de alto impacto. 
-              Con años de experiencia en el sector, ofrecemos productos de calidad 
-              con garantía de un año.
+              {configuracion.sobreNosotros?.descripcion || 'En ARCO transformamos ideas en soluciones gráficas de alto impacto. Con años de experiencia en el sector, ofrecemos productos de calidad con garantía de un año.'}
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
+            {(configuracion.sobreNosotros?.valores || [
               {
                 icon: "🎨",
                 title: "Diseño Creativo",
@@ -82,7 +94,7 @@ const Home = () => {
                 title: "Soluciones Integrales",
                 desc: "Desde el diseño hasta la instalación, ofrecemos un servicio completo y personalizado."
               }
-            ].map((item, index) => (
+            ]).map((item, index) => (
               <motion.div
                 key={index}
                 initial="hidden"
@@ -143,47 +155,144 @@ const Home = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                icon: "🪧",
-                title: "Cartelería",
-                desc: "Carteles lumínicos y no lumínicos, identificativos y señalética."
-              },
-              {
-                icon: "🖨️",
-                title: "Impresión",
-                desc: "Gigantografías, pendones, doyles, posavasos y cartas menú."
-              },
-              {
-                icon: "🎯",
-                title: "Diseño Gráfico",
-                desc: "Tarjetas de presentación, invitaciones, estafetas y credenciales."
-              },
-              {
-                icon: "🏗️",
-                title: "Montaje",
-                desc: "Instalación, mantenimiento y ambientación de interiores y exteriores."
-              }
-            ].map((service, index) => (
-              <motion.div
-                key={index}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={scaleUp}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-                className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 group"
-              >
-                <div className="bg-gradient-to-br from-primary to-blue-700 w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
-                  <span className="text-white">{service.icon}</span>
-                </div>
-                <h3 className="text-lg font-bold text-primary mb-2">{service.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{service.desc}</p>
-                <Link to="/servicios" className="text-secondary font-semibold text-sm inline-flex items-center gap-1 mt-3 hover:gap-2 transition-all">
-                  Saber más →
-                </Link>
-              </motion.div>
-            ))}
+            {destacados.length > 0 ? (
+              destacados.map((service, index) => (
+                <motion.div
+                  key={service.id || index}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  variants={scaleUp}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 group"
+                >
+                  <div className="bg-gradient-to-br from-primary to-blue-700 w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
+                    <span className="text-white">{service.icono}</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-primary mb-2">{service.titulo}</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{service.descripcion}</p>
+                  <Link to={service.link || '/servicios'} className="text-secondary font-semibold text-sm inline-flex items-center gap-1 mt-3 hover:gap-2 transition-all">
+                    Saber más →
+                  </Link>
+                </motion.div>
+              ))
+            ) : (
+              // Fallback si no hay servicios destacados en el contexto
+              [
+                {
+                  icono: '💡',
+                  titulo: 'Cartelería Lumínica',
+                  descripcion: 'Carteles con iluminación LED de bajo consumo, larga durabilidad y alta visibilidad. Ideales para exteriores.',
+                  link: '/servicios'
+                },
+                {
+                  icono: '🪧',
+                  titulo: 'Cartelería No Lumínica',
+                  descripcion: 'Carteles identificativos, señalética y rótulos para interiores y exteriores con materiales de alta resistencia.',
+                  link: '/servicios'
+                },
+                {
+                  icono: '🖨️',
+                  titulo: 'Impresión y Serigrafía',
+                  descripcion: 'Gigantografías, pendones, doyles, posavasos, cartas menú y serigrafía sobre textiles.',
+                  link: '/servicios'
+                },
+                {
+                  icono: '🔧',
+                  titulo: 'Levantamiento y Montaje',
+                  descripcion: 'Levantamiento, diseño, instalación, mantenimiento y ambientación de interiores y exteriores.',
+                  link: '/servicios'
+                }
+              ].map((service, index) => (
+                <motion.div
+                  key={index}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  variants={scaleUp}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 group"
+                >
+                  <div className="bg-gradient-to-br from-primary to-blue-700 w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
+                    <span className="text-white">{service.icono}</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-primary mb-2">{service.titulo}</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{service.descripcion}</p>
+                  <Link to={service.link} className="text-secondary font-semibold text-sm inline-flex items-center gap-1 mt-3 hover:gap-2 transition-all">
+                    Saber más →
+                  </Link>
+                </motion.div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== SECCIÓN DE TESTIMONIOS (SOLO APROBADOS) ===== */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+            transition={{ duration: 0.6 }}
+            className="text-center max-w-3xl mx-auto mb-16"
+          >
+            <span className="text-secondary font-semibold text-sm uppercase tracking-wider">Testimonios</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-primary mt-2 mb-4">
+              Lo que dicen nuestros clientes
+            </h2>
+            <p className="text-gray-600">
+              Opiniones reales de empresas que confían en {configuracion.nombreEmpresa || 'ARCO'}.
+            </p>
+          </motion.div>
+
+          {testimoniosAprobados.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {testimoniosAprobados.map((testimonio, index) => (
+                <motion.div
+                  key={testimonio.id}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  variants={scaleUp}
+                  transition={{ delay: index * 0.15, duration: 0.5 }}
+                  className="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-all"
+                >
+                  <div className="flex items-center space-x-4 mb-4">
+                    <img 
+                      src={testimonio.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(testimonio.nombre)}&background=0a3d6b&color=fff&size=100`} 
+                      alt={testimonio.nombre} 
+                      className="w-14 h-14 rounded-full border-2 border-primary object-cover" 
+                      loading="lazy" 
+                    />
+                    <div>
+                      <h4 className="font-bold text-primary">{testimonio.nombre}</h4>
+                      <p className="text-sm text-gray-500">{testimonio.empresa || 'Cliente'}</p>
+                    </div>
+                  </div>
+                  <div className="text-yellow-400 text-sm mb-2">
+                    {"⭐".repeat(testimonio.calificacion || 5)}
+                  </div>
+                  <p className="text-gray-700 leading-relaxed">"{testimonio.reseña}"</p>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-400">No hay testimonios disponibles aún.</p>
+            </div>
+          )}
+
+          {/* ===== BOTÓN PARA DEJAR TESTIMONIO ===== */}
+          <div className="text-center mt-10">
+            <Link
+              to="/testimonio"
+              className="inline-block bg-secondary text-primary px-8 py-3 rounded-full font-semibold hover:bg-yellow-400 transition-all transform hover:scale-105 shadow-md"
+            >
+              ✍️ Deja tu testimonio
+            </Link>
           </div>
         </div>
       </section>
