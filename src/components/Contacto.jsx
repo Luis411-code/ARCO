@@ -1,51 +1,38 @@
+// src/components/Contacto.jsx
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { useAppContext } from '../context/AppContext';
+import { useRef, useState } from 'react';
+import { guardarMensaje } from '../api/contacto';
 
 const Contacto = () => {
-  const { addMensaje } = useAppContext();
-  const [formData, setFormData] = useState({
-    nombre: '',
-    email: '',
-    telefono: '',
-    mensaje: ''
-  });
+  const formRef = useRef();
   const [enviado, setEnviado] = useState(false);
   const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
-
-  const handlePhoneChange = (e) => {
-    const value = e.target.value.replace(/[^0-9+ ]/g, '');
-    setFormData({
-      ...formData,
-      telefono: value
-    });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setCargando(true);
+    setError('');
 
-    // ===== GUARDAR MENSAJE EN EL CONTEXTO (DASHBOARD) =====
-    addMensaje({
-      nombre: formData.nombre,
-      email: formData.email,
-      telefono: formData.telefono || 'No especificado',
-      mensaje: formData.mensaje
-    });
+    const formData = new FormData(e.target);
+    const datos = {
+      nombre: formData.get('nombre'),
+      email: formData.get('email'),
+      telefono: formData.get('telefono'),
+      mensaje: formData.get('mensaje')
+    };
 
-    // ===== MOSTRAR CONFIRMACIÓN =====
+    const resultado = await guardarMensaje(datos);
+    
+    if (resultado.success) {
+      setEnviado(true);
+      e.target.reset();
+      setTimeout(() => setEnviado(false), 5000);
+    } else {
+      setError('Error al enviar el mensaje. Intenta de nuevo.');
+    }
+    
     setCargando(false);
-    setEnviado(true);
-    setFormData({ nombre: '', email: '', telefono: '', mensaje: '' });
-    setTimeout(() => setEnviado(false), 5000);
   };
 
   return (
@@ -82,9 +69,8 @@ const Contacto = () => {
                   <span className="text-secondary text-2xl">📞</span>
                   <div>
                     <p className="font-medium text-gray-800">Teléfonos</p>
-                    <a href="tel:54330343" className="text-gray-600 hover:text-secondary transition-colors">54330343</a>
-                    <br />
-                    <a href="tel:53785749" className="text-gray-600 hover:text-secondary transition-colors">53785749</a>
+                    <p className="text-gray-600">54330343</p>
+                    <p className="text-gray-600">53785749</p>
                   </div>
                 </div>
 
@@ -116,17 +102,9 @@ const Contacto = () => {
               </div>
 
               <div className="mt-6 pt-6 border-t border-gray-200">
-                <a
-                  href="https://wa.me/5359342808"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105 shadow-md"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                  </svg>
-                  WhatsApp
-                </a>
+                <p className="text-sm text-gray-500">
+                  📱 También puedes contactarnos por WhatsApp al mismo número.
+                </p>
               </div>
             </div>
           </motion.div>
@@ -144,29 +122,31 @@ const Contacto = () => {
                 <div className="bg-green-50 text-green-700 p-6 rounded-xl text-center">
                   <div className="text-4xl mb-3">✅</div>
                   <p className="font-semibold">¡Mensaje enviado con éxito!</p>
-                  <p className="text-sm mt-2">Hemos recibido tu mensaje. Te responderemos pronto.</p>
+                  <p className="text-sm mt-2">Nos pondremos en contacto contigo pronto.</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+                  {error && (
+                    <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
+                      ❌ {error}
+                    </div>
+                  )}
+                  
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
                     <input 
                       type="text" 
                       name="nombre"
-                      value={formData.nombre}
-                      onChange={handleChange}
                       required
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
                       placeholder="Tu nombre"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input 
                       type="email" 
                       name="email"
-                      value={formData.email}
-                      onChange={handleChange}
                       required
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
                       placeholder="tu@email.com"
@@ -177,21 +157,14 @@ const Contacto = () => {
                     <input 
                       type="tel" 
                       name="telefono"
-                      value={formData.telefono}
-                      onChange={handlePhoneChange}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                      placeholder="+53 5XXXXXXXX"
-                      pattern="[0-9+ ]+"
-                      title="Solo números y el signo +"
+                      placeholder="Tu número de teléfono"
                     />
-                    <p className="text-xs text-gray-400 mt-1">Solo números y el signo +</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
                     <textarea 
                       name="mensaje"
-                      value={formData.mensaje}
-                      onChange={handleChange}
                       required
                       rows="4"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
@@ -201,10 +174,10 @@ const Contacto = () => {
                   <button 
                     type="submit"
                     disabled={cargando}
-                    className={`w-full py-3.5 rounded-lg font-semibold transition-all transform hover:scale-[1.02] hover:shadow-lg shadow-md text-base ${
+                    className={`w-full bg-primary text-white py-3 rounded-lg font-semibold shadow-md transition-all ${
                       cargando 
-                        ? 'bg-gray-400 cursor-not-allowed' 
-                        : 'bg-gradient-to-r from-primary to-blue-700 text-white'
+                        ? 'opacity-70 cursor-not-allowed' 
+                        : 'hover:bg-blue-800 hover:scale-[1.02]'
                     }`}
                   >
                     {cargando ? 'Enviando...' : 'Enviar Mensaje'}
