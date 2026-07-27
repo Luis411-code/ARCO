@@ -17,7 +17,7 @@ import { useAppContext } from './context/AppContext';
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const LoginAdmin = lazy(() => import('./pages/LoginAdmin'));
 
-// ===== LAYOUT PÚBLICO (con Header y Footer) =====
+// ===== LAYOUT PÚBLICO =====
 const PublicLayout = ({ children }) => (
   <div className="flex flex-col min-h-screen">
     <Header />
@@ -28,7 +28,7 @@ const PublicLayout = ({ children }) => (
   </div>
 );
 
-// ===== LAYOUT DE ADMIN (sin Header ni Footer) =====
+// ===== LAYOUT DE ADMIN =====
 const AdminLayout = ({ children }) => (
   <div className="min-h-screen">
     {children}
@@ -36,21 +36,21 @@ const AdminLayout = ({ children }) => (
 );
 
 function AppContent() {
-  const { loadFromMongoDB, servicios, setServicios } = useAppContext();
+  const { loadFromMongoDB, setServicios, setConfiguracion } = useAppContext();
 
   // ===== CARGAR DATOS DESDE MONGODB AL INICIAR LA APP =====
   useEffect(() => {
     const cargarDatos = async () => {
-      // Primero intentar cargar desde MongoDB
+      console.log('📥 Cargando datos desde MongoDB...');
       const result = await loadFromMongoDB();
       
       if (result.success && result.results) {
-        // Si hay datos en MongoDB, actualizar el contexto
+        console.log('✅ Datos cargados desde MongoDB:', result.results);
         if (result.results.servicios && result.results.servicios.length > 0) {
           setServicios(result.results.servicios);
         }
       } else {
-        // Si no hay datos en MongoDB, intentar cargar desde localStorage
+        console.warn('⚠️ No se pudieron cargar datos desde MongoDB, usando localStorage');
         const savedServicios = localStorage.getItem('arco_servicios');
         if (savedServicios) {
           setServicios(JSON.parse(savedServicios));
