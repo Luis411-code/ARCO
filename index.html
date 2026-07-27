@@ -51,15 +51,36 @@
         pointer-events: none;
       }
 
-      /* ===== LOGO CON BORDES REDONDEADOS SUAVES (sin distorsión) ===== */
+      /* ===== LOGO CON PULSACIÓN ===== */
       .preloader-logo-wrapper {
-        background: linear-gradient(135deg, rgba(240, 180, 41, 0.1), rgba(240, 180, 41, 0.02));
-        padding: 12px;
+        position: relative;
+        background: linear-gradient(135deg, rgba(240, 180, 41, 0.12), rgba(240, 180, 41, 0.03));
+        padding: 14px;
         border-radius: 28px;
-        box-shadow: 0 0 60px rgba(240, 180, 41, 0.15), 0 0 120px rgba(240, 180, 41, 0.05);
         border: 2px solid rgba(240, 180, 41, 0.2);
-        animation: pulse-icon 2s ease-in-out infinite;
+        animation: pulse-container 2.2s ease-in-out infinite;
+        box-shadow: 0 0 60px rgba(240, 180, 41, 0.08);
         transition: all 0.3s ease;
+      }
+
+      .preloader-logo-wrapper::before {
+        content: '';
+        position: absolute;
+        inset: -8px;
+        border-radius: 34px;
+        background: linear-gradient(135deg, rgba(240, 180, 41, 0.1), transparent, rgba(240, 180, 41, 0.1));
+        animation: pulse-ring 2.2s ease-in-out infinite;
+        z-index: -1;
+      }
+
+      .preloader-logo-wrapper::after {
+        content: '';
+        position: absolute;
+        inset: -16px;
+        border-radius: 42px;
+        background: radial-gradient(circle at center, rgba(240, 180, 41, 0.06), transparent 70%);
+        animation: pulse-glow 2.2s ease-in-out infinite;
+        z-index: -2;
       }
 
       .preloader-logo-wrapper img {
@@ -68,68 +89,145 @@
         display: block;
         border-radius: 20px;
         object-fit: contain;
+        animation: pulse-logo 2.2s ease-in-out infinite;
+        filter: drop-shadow(0 0 20px rgba(240, 180, 41, 0.1));
       }
 
-      @keyframes pulse-icon {
+      @keyframes pulse-container {
         0%, 100% { 
           transform: scale(1); 
-          box-shadow: 0 0 60px rgba(240, 180, 41, 0.15);
+          border-color: rgba(240, 180, 41, 0.2);
+          box-shadow: 0 0 60px rgba(240, 180, 41, 0.08);
         }
         50% { 
-          transform: scale(1.04); 
-          box-shadow: 0 0 80px rgba(240, 180, 41, 0.25);
+          transform: scale(1.03); 
+          border-color: rgba(240, 180, 41, 0.4);
+          box-shadow: 0 0 100px rgba(240, 180, 41, 0.2);
         }
       }
 
+      @keyframes pulse-ring {
+        0%, 100% { 
+          opacity: 0.3;
+          transform: scale(1);
+        }
+        50% { 
+          opacity: 1;
+          transform: scale(1.05);
+        }
+      }
+
+      @keyframes pulse-glow {
+        0%, 100% { 
+          opacity: 0.2;
+          transform: scale(1);
+        }
+        50% { 
+          opacity: 0.6;
+          transform: scale(1.1);
+        }
+      }
+
+      @keyframes pulse-logo {
+        0%, 100% { 
+          transform: scale(1); 
+          filter: drop-shadow(0 0 20px rgba(240, 180, 41, 0.1));
+        }
+        50% { 
+          transform: scale(1.06); 
+          filter: drop-shadow(0 0 40px rgba(240, 180, 41, 0.25));
+        }
+      }
+
+      /* ===== NÚMERO ===== */
       .preloader-number {
         font-size: 40px;
         font-weight: 200;
         color: rgba(255, 255, 255, 0.9);
-        margin-top: 28px;
+        margin-top: 32px;
         font-family: 'Inter', system-ui, sans-serif;
+        letter-spacing: 2px;
       }
 
       .preloader-number .percent {
         color: #f0b429;
         font-size: 20px;
+        font-weight: 300;
       }
 
+      /* ===== BARRA ===== */
       .preloader-bar {
-        width: 180px;
+        width: 200px;
         height: 3px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.08);
         border-radius: 4px;
         overflow: hidden;
-        margin-top: 14px;
+        margin-top: 16px;
+        position: relative;
+      }
+
+      .preloader-bar::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(240, 180, 41, 0.1), transparent);
+        animation: shimmer-bar 1.8s ease-in-out infinite;
+      }
+
+      @keyframes shimmer-bar {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
       }
 
       .preloader-bar-fill {
         height: 100%;
         width: 0%;
-        background: #f0b429;
+        background: linear-gradient(90deg, #f0b429, #f5d06a, #f0b429);
         border-radius: 4px;
-        transition: width 0.15s ease;
-        box-shadow: 0 0 20px rgba(240, 180, 41, 0.3);
+        transition: width 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 25px rgba(240, 180, 41, 0.3);
+        position: relative;
+        z-index: 1;
       }
 
+      /* ===== TEXTO DE ESTADO ===== */
       .preloader-status {
         color: rgba(255, 255, 255, 0.3);
         font-size: 10px;
-        letter-spacing: 3px;
+        letter-spacing: 4px;
         text-transform: uppercase;
-        margin-top: 16px;
+        margin-top: 18px;
         font-family: 'Inter', system-ui, sans-serif;
+        transition: all 0.3s ease;
+        min-height: 20px;
       }
 
+      /* ===== RESPONSIVE ===== */
       @media (max-width: 640px) {
         .preloader-logo-wrapper img {
           height: 60px;
+        }
+        .preloader-logo-wrapper {
+          padding: 10px;
+          border-radius: 22px;
         }
         .preloader-number {
           font-size: 32px;
         }
         .preloader-bar {
-          width: 150px;
+          width: 160px;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .preloader-logo-wrapper img {
+          height: 48px;
+        }
+        .preloader-number {
+          font-size: 26px;
+        }
+        .preloader-bar {
+          width: 140px;
         }
       }
     </style>
@@ -146,7 +244,7 @@
       <div class="preloader-bar">
         <div class="preloader-bar-fill" id="progressBar"></div>
       </div>
-      <div class="preloader-status" id="statusText">Cargando...</div>
+      <div class="preloader-status" id="statusText">Iniciando...</div>
     </div>
 
     <div id="root"></div>
@@ -167,10 +265,10 @@
         const steps = duration / interval;
 
         const statusMessages = [
-          { min: 0, max: 25, text: 'Iniciando...' },
-          { min: 25, max: 50, text: 'Cargando recursos...' },
-          { min: 50, max: 75, text: 'Preparando experiencia...' },
-          { min: 75, max: 95, text: 'Casi listo...' }
+          { min: 0, max: 20, text: 'Iniciando...' },
+          { min: 20, max: 45, text: 'Cargando recursos...' },
+          { min: 45, max: 70, text: 'Preparando experiencia...' },
+          { min: 70, max: 90, text: 'Casi listo...' }
         ];
 
         function updateProgress() {
@@ -187,18 +285,18 @@
             
             setTimeout(() => {
               root.classList.add('visible');
-            }, 100);
+            }, 150);
             
             setTimeout(() => {
               preloader.classList.add('hidden');
               document.body.style.overflow = '';
               document.body.style.position = '';
-            }, 400);
+            }, 500);
           }
 
           const rounded = Math.min(Math.round(progress), 100);
           progressBar.style.width = rounded + '%';
-          progressNumber.textContent = rounded;
+          progressNumber.innerHTML = rounded + '<span class="percent">%</span>';
 
           const currentStatus = statusMessages.find(
             msg => rounded >= msg.min && rounded < msg.max
@@ -216,18 +314,18 @@
             isComplete = true;
             clearInterval(timer);
             progressBar.style.width = '100%';
-            progressNumber.textContent = '100';
+            progressNumber.innerHTML = '100<span class="percent">%</span>';
             statusText.textContent = '✨ ¡Listo! ✨';
             
             setTimeout(() => {
               root.classList.add('visible');
-            }, 100);
+            }, 150);
             
             setTimeout(() => {
               preloader.classList.add('hidden');
               document.body.style.overflow = '';
               document.body.style.position = '';
-            }, 400);
+            }, 500);
           }
         }, 3500);
 
