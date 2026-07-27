@@ -1,12 +1,16 @@
+// src/pages/dashboard/ServiciosManager.jsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
+import { apiService } from '../../services/apiService';
 
 const ServiciosManager = () => {
   const { servicios, addServicio, deleteServicio, updateServicio } = useAppContext();
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [imagenesPreview, setImagenesPreview] = useState([]);
+  const [subiendo, setSubiendo] = useState(false);
+  const [mensaje, setMensaje] = useState('');
   const [formData, setFormData] = useState({
     titulo: '',
     desc: '',
@@ -17,23 +21,29 @@ const ServiciosManager = () => {
     camposFormulario: []
   });
 
-  // ===== CAMPOS DEL FORMULARIO =====
-  const [mostrarCampos, setMostrarCampos] = useState(false);
-  const [nuevoCampo, setNuevoCampo] = useState({
-    id: '',
-    label: '',
-    tipo: 'text',
-    placeholder: '',
-    required: true,
-    opciones: []
-  });
-  const [opcionesInput, setOpcionesInput] = useState('');
-  const [mensajeCampos, setMensajeCampos] = useState('');
-  
-  // ===== EDITAR CAMPO =====
-  const [editandoCampoIndex, setEditandoCampoIndex] = useState(null);
-  const [campoEditando, setCampoEditando] = useState(null);
-  const [showEditFieldModal, setShowEditFieldModal] = useState(false);
+  // ===== SUBIR IMAGEN A CLOUDINARY =====
+  const subirImagen = async (base64Image) => {
+    try {
+      setSubiendo(true);
+      setMensaje('📤 Subiendo imagen...');
+      
+      const result = await apiService.uploadImage(base64Image, 'arco/servicios');
+      
+      if (result.success) {
+        setMensaje('✅ Imagen subida correctamente');
+        return result.url;
+      } else {
+        setMensaje('❌ Error al subir imagen: ' + result.error);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error al subir imagen:', error);
+      setMensaje('❌ Error al subir imagen');
+      return null;
+    } finally {
+      setSubiendo(false);
+    }
+  };
 
   // ===== CONVERTIR IMAGEN A BASE64 =====
   const convertirABase64 = (file) => {
@@ -45,14 +55,32 @@ const ServiciosManager = () => {
     });
   };
 
+  // ===== MANEJAR SUBIDA DE IMÁGENES =====
   const handleImagenesChange = async (e) => {
     const files = Array.from(e.target.files);
-    const imagenesBase64 = await Promise.all(files.map(file => convertirABase64(file)));
-    setImagenesPreview(imagenesBase64);
-    setFormData({
-      ...formData,
-      imagenes: imagenesBase64
-    });
+    if (files.length === 0) return;
+
+    setMensaje('📤 Procesando imágenes...');
+    const nuevasImagenes = [];
+
+    for (const file of files) {
+      const base64 = await convertirABase64(file);
+      const url = await subirImagen(base64);
+      
+      if (url) {
+        nuevasImagenes.push(url);
+      }
+    }
+
+    if (nuevasImagenes.length > 0) {
+      const imagenesActuales = formData.imagenes || [];
+      setFormData({
+        ...formData,
+        imagenes: [...imagenesActuales, ...nuevasImagenes]
+      });
+      setImagenesPreview([...imagenesPreview, ...nuevasImagenes]);
+      setMensaje(`✅ ${nuevasImagenes.length} imágenes subidas correctamente`);
+    }
   };
 
   const eliminarImagen = (index) => {
@@ -69,25 +97,36 @@ const ServiciosManager = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     const camposValidos = formData.camposFormulario.every(c => c.id && c.label);
     if (!camposValidos) {
-      setMensajeCampos('⚠️ Todos los campos deben tener ID y etiqueta');
+      setMensaje('⚠️ Todos los campos deben tener ID y etiqueta');
       return;
     }
 
+    // Asegurar que las imágenes son URLs (no Base64)
+    const servicioData = {
+      ...formData,
+      imagenes: formData.imagenes.filter(img => img.startsWith('http'))
+    };
+
     if (editingId) {
-      updateServicio(editingId, formData);
+      updateServicio(editingId, servicioData);
+      setMensaje('✅ Servicio actualizado correctamente');
     } else {
-      addServicio(formData);
+      addServicio(servicioData);
+      setMensaje('✅ Servicio agregado correctamente');
     }
-    setShowModal(false);
-    setEditingId(null);
-    setFormData({ titulo: '', desc: '', icono: '📋', precio: '', categoria: 'Cartelería', imagenes: [], camposFormulario: [] });
-    setImagenesPreview([]);
-    setMensajeCampos('');
+
+    setTimeout(() => {
+      setShowModal(false);
+      setEditingId(null);
+      setFormData({ titulo: '', desc: '', icono: '📋', precio: '', categoria: 'Cartelería', imagenes: [], camposFormulario: [] });
+      setImagenesPreview([]);
+      setMensaje('');
+    }, 1500);
   };
 
   const handleEdit = (servicio) => {
@@ -108,24 +147,34 @@ const ServiciosManager = () => {
       setImagenesPreview([]);
     }
     setShowModal(true);
-    setMensajeCampos('');
+    setMensaje('');
   };
 
-  const handleDelete = (id) => {
-    if (confirm('¿Estás seguro de eliminar este servicio?')) {
-      deleteServicio(id);
-    }
-  };
+  // ===== CAMPOS DEL FORMULARIO =====
+  const [mostrarCampos, setMostrarCampos] = useState(false);
+  const [nuevoCampo, setNuevoCampo] = useState({
+    id: '',
+    label: '',
+    tipo: 'text',
+    placeholder: '',
+    required: true,
+    opciones: []
+  });
+  const [opcionesInput, setOpcionesInput] = useState('');
 
-  // ===== FUNCIONES PARA CAMPOS =====
+  // ===== EDITAR CAMPO =====
+  const [editandoCampoIndex, setEditandoCampoIndex] = useState(null);
+  const [campoEditando, setCampoEditando] = useState(null);
+  const [showEditFieldModal, setShowEditFieldModal] = useState(false);
+
   const agregarCampo = () => {
     if (!nuevoCampo.id || !nuevoCampo.label) {
-      setMensajeCampos('⚠️ El ID y la etiqueta son obligatorios');
+      setMensaje('⚠️ El ID y la etiqueta son obligatorios');
       return;
     }
 
     if (formData.camposFormulario.some(c => c.id === nuevoCampo.id)) {
-      setMensajeCampos('⚠️ Ya existe un campo con ese ID');
+      setMensaje('⚠️ Ya existe un campo con ese ID');
       return;
     }
 
@@ -141,20 +190,19 @@ const ServiciosManager = () => {
 
     setNuevoCampo({ id: '', label: '', tipo: 'text', placeholder: '', required: true, opciones: [] });
     setOpcionesInput('');
-    setMensajeCampos('✅ Campo agregado correctamente');
-    setTimeout(() => setMensajeCampos(''), 2000);
+    setMensaje('✅ Campo agregado correctamente');
+    setTimeout(() => setMensaje(''), 2000);
   };
 
   const eliminarCampo = (index) => {
     if (confirm('¿Eliminar este campo?')) {
       const nuevosCampos = formData.camposFormulario.filter((_, i) => i !== index);
       setFormData({ ...formData, camposFormulario: nuevosCampos });
-      setMensajeCampos('✅ Campo eliminado');
-      setTimeout(() => setMensajeCampos(''), 1500);
+      setMensaje('✅ Campo eliminado');
+      setTimeout(() => setMensaje(''), 1500);
     }
   };
 
-  // ===== EDITAR CAMPO =====
   const abrirEditarCampo = (index) => {
     const campo = formData.camposFormulario[index];
     setEditandoCampoIndex(index);
@@ -164,16 +212,15 @@ const ServiciosManager = () => {
 
   const guardarEdicionCampo = () => {
     if (!campoEditando.id || !campoEditando.label) {
-      setMensajeCampos('⚠️ El ID y la etiqueta son obligatorios');
+      setMensaje('⚠️ El ID y la etiqueta son obligatorios');
       return;
     }
 
-    // Verificar que el ID no esté duplicado (excepto con el mismo campo)
     const duplicado = formData.camposFormulario.some(
       (c, idx) => c.id === campoEditando.id && idx !== editandoCampoIndex
     );
     if (duplicado) {
-      setMensajeCampos('⚠️ Ya existe otro campo con ese ID');
+      setMensaje('⚠️ Ya existe otro campo con ese ID');
       return;
     }
 
@@ -183,8 +230,8 @@ const ServiciosManager = () => {
     setShowEditFieldModal(false);
     setEditandoCampoIndex(null);
     setCampoEditando(null);
-    setMensajeCampos('✅ Campo actualizado correctamente');
-    setTimeout(() => setMensajeCampos(''), 2000);
+    setMensaje('✅ Campo actualizado correctamente');
+    setTimeout(() => setMensaje(''), 2000);
   };
 
   const handleNuevoCampoChange = (e) => {
@@ -217,7 +264,7 @@ const ServiciosManager = () => {
             setEditingId(null);
             setFormData({ titulo: '', desc: '', icono: '📋', precio: '', categoria: 'Cartelería', imagenes: [], camposFormulario: [] });
             setImagenesPreview([]);
-            setMensajeCampos('');
+            setMensaje('');
             setShowModal(true);
           }}
           className="bg-gradient-to-r from-primary to-blue-700 text-white px-4 py-2 rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-105"
@@ -225,71 +272,6 @@ const ServiciosManager = () => {
           + Agregar Servicio
         </button>
       </div>
-
-      {/* LISTA DE SERVICIOS */}
-      {servicios.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-md p-8 text-center">
-          <p className="text-gray-500">No hay servicios agregados todavía.</p>
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Icono</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campos</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {servicios.map((servicio, index) => (
-                  <motion.tr
-                    key={servicio.id || index}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 text-sm text-gray-500">{index + 1}</td>
-                    <td className="px-6 py-4 text-2xl">{servicio.icono || '📋'}</td>
-                    <td className="px-6 py-4 font-medium text-gray-900">{servicio.titulo}</td>
-                    <td className="px-6 py-4 text-gray-600">{servicio.categoria}</td>
-                    <td className="px-6 py-4 text-gray-600">{servicio.precio}</td>
-                    <td className="px-6 py-4">
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                        {servicio.camposFormulario?.length || 0} campos
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(servicio)}
-                          className="text-blue-600 hover:text-blue-800 transition-colors"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => handleDelete(servicio.id)}
-                          className="text-red-600 hover:text-red-800 transition-colors"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="px-6 py-3 bg-gray-50 text-sm text-gray-500">
-            Total: {servicios.length} servicios
-          </div>
-        </div>
-      )}
 
       {/* ===== MODAL PRINCIPAL ===== */}
       {showModal && (
@@ -303,15 +285,17 @@ const ServiciosManager = () => {
               {editingId ? '✏️ Editar Servicio' : '➕ Agregar Servicio'}
             </h3>
 
-            {mensajeCampos && (
+            {mensaje && (
               <div className={`p-3 rounded-lg mb-4 text-sm ${
-                mensajeCampos.includes('✅') 
+                mensaje.includes('✅') 
                   ? 'bg-green-50 text-green-700 border border-green-200' 
-                  : mensajeCampos.includes('⚠️')
+                  : mensaje.includes('⚠️')
                   ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                  : 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : mensaje.includes('📤')
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'bg-red-50 text-red-700 border border-red-200'
               }`}>
-                {mensajeCampos}
+                {mensaje}
               </div>
             )}
 
@@ -385,7 +369,7 @@ const ServiciosManager = () => {
                 </div>
               </div>
 
-              {/* IMÁGENES */}
+              {/* IMÁGENES - SUBIDA A CLOUDINARY */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Imágenes</label>
                 <input
@@ -393,19 +377,33 @@ const ServiciosManager = () => {
                   multiple
                   accept="image/*"
                   onChange={handleImagenesChange}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-secondary/10 file:text-secondary hover:file:bg-secondary/20"
+                  disabled={subiendo}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-secondary/10 file:text-secondary hover:file:bg-secondary/20 disabled:opacity-50"
                 />
+                {subiendo && (
+                  <div className="mt-2 flex items-center gap-2 text-blue-600">
+                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-sm">Subiendo imagen a la nube...</span>
+                  </div>
+                )}
               </div>
 
               {imagenesPreview.length > 0 && (
                 <div className="flex flex-wrap gap-3">
                   {imagenesPreview.map((preview, idx) => (
-                    <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
-                      <img src={preview} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                    <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 group">
+                      <img 
+                        src={preview} 
+                        alt={`Preview ${idx}`} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/80x80/0a3d6b/ffffff?text=Error';
+                        }}
+                      />
                       <button
                         type="button"
                         onClick={() => eliminarImagen(idx)}
-                        className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-700"
+                        className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-700 transition-colors opacity-0 group-hover:opacity-100"
                       >
                         ×
                       </button>
@@ -430,7 +428,6 @@ const ServiciosManager = () => {
                       Personaliza los campos que se mostrarán cuando el cliente solicite este servicio.
                     </p>
 
-                    {/* ===== CAMPOS ACTUALES CON BOTÓN EDITAR ===== */}
                     {formData.camposFormulario.length > 0 && (
                       <div className="space-y-2">
                         <h4 className="text-sm font-semibold text-gray-700">Campos actuales:</h4>
@@ -467,7 +464,6 @@ const ServiciosManager = () => {
                       </div>
                     )}
 
-                    {/* ===== AGREGAR NUEVO CAMPO ===== */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">ID del campo *</label>
@@ -562,7 +558,7 @@ const ServiciosManager = () => {
                     setShowModal(false);
                     setEditingId(null);
                     setImagenesPreview([]);
-                    setMensajeCampos('');
+                    setMensaje('');
                   }}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-all"
                 >
@@ -570,7 +566,8 @@ const ServiciosManager = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-primary to-blue-700 text-white px-4 py-2 rounded-lg font-semibold hover:shadow-lg transition-all"
+                  disabled={subiendo}
+                  className="flex-1 bg-gradient-to-r from-primary to-blue-700 text-white px-4 py-2 rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50"
                 >
                   {editingId ? 'Actualizar' : 'Guardar'}
                 </button>
