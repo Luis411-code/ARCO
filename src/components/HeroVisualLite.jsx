@@ -96,20 +96,8 @@ const HeroVisualLite = () => {
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
       
       <div className="relative z-10 container mx-auto px-4 text-center">
-        {/* Logo ARCO en el Hero */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8"
-        >
-          <img 
-            src="/logo.png" 
-            alt="ARCO" 
-            className="h-16 md:h-20 w-auto mx-auto drop-shadow-2xl"
-          />
-        </motion.div>
-
+        {/* ===== LOGO ELIMINADO ===== */}
+        
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -155,12 +143,7 @@ const HeroVisualLite = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </Link>
-          <Link
-            to="/contacto"
-            className="bg-white/10 backdrop-blur-sm text-white px-10 py-4 rounded-full font-semibold border border-white/30 hover:bg-white/20 transition-all"
-          >
-            Contáctanos
-          </Link>
+          {/* ===== BOTÓN "CONTÁCTANOS" ELIMINADO ===== */}
         </motion.div>
 
         <motion.div
