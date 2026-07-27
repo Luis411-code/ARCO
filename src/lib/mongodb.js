@@ -1,38 +1,41 @@
+// src/lib/mongodb.js
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI;
+const uri = import.meta.env.VITE_MONGODB_URI || process.env.MONGODB_URI;
 const options = {};
 
 let client;
 let clientPromise;
 
 if (!uri) {
-  throw new Error('❌ MONGODB_URI no está definida en las variables de entorno');
+  console.warn('⚠️ MONGODB_URI no está definida');
 }
 
 if (process.env.NODE_ENV === 'development') {
-  // En desarrollo, usa una variable global para mantener la conexión
   if (!global._mongoClientPromise) {
     client = new MongoClient(uri, options);
     global._mongoClientPromise = client.connect();
   }
   clientPromise = global._mongoClientPromise;
 } else {
-  // En producción (Vercel), crea una nueva conexión
   client = new MongoClient(uri, options);
   clientPromise = client.connect();
 }
 
 export default clientPromise;
 
-// Función helper para obtener la base de datos
 export async function getDb() {
-  const client = await clientPromise;
-  return client.db(process.env.MONGODB_DB || 'arco-bd');
+  try {
+    const client = await clientPromise;
+    return client.db(import.meta.env.VITE_MONGODB_DB || process.env.MONGODB_DB || 'arco-bd');
+  } catch (error) {
+    console.error('❌ Error al conectar a MongoDB:', error);
+    return null;
+  }
 }
 
-// Función helper para obtener una colección
 export async function getCollection(collectionName) {
   const db = await getDb();
+  if (!db) return null;
   return db.collection(collectionName);
 }
