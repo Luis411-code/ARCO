@@ -15,7 +15,7 @@ async function connectToDatabase() {
   }
 
   if (!uri) {
-    throw new Error('❌ MONGODB_URI no está definida en las variables de entorno');
+    throw new Error('❌ MONGODB_URI no está definida');
   }
 
   try {
@@ -31,59 +31,120 @@ async function connectToDatabase() {
 }
 
 export default async function handler(req, res) {
-  // Configurar CORS
+  // CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  // Solo permitir POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
-  }
-
   try {
-    const { nombre, email, telefono, mensaje } = req.body;
+    const client = await connectToDatabase();
+    const db = client.db(process.env.MONGODB_DB || 'arco-bd');
 
-    // Validación
-    if (!nombre || !email || !mensaje) {
-      return res.status(400).json({ 
-        error: 'Faltan campos obligatorios: nombre, email y mensaje son requeridos' 
+    // ============================================================
+    //  GET - Obtener datos
+    // ============================================================
+    if (req.method === 'GET') {
+      const { collection } = req.query;
+
+      if (!collection) {
+        return res.status(400).json({ error: 'Falta el parámetro collection' });
+      }
+
+      const col = db.collection(collection);
+      const data = await col.find({}).toArray();
+
+      return res.status(200).json({
+        success: true,
+        data,
+        count: data.length
       });
     }
 
-    // Validación de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: 'Email no válido' });
+    // ============================================================
+    //  POST - Guardar datos
+    // ============================================================
+    if (req.method === 'POST') {
+      const { collection, data } = req.body;
+
+      if (!collection || !data) {
+        return res.status(400).json({ error: 'Faltan campos: collection y data' });
+      }
+
+      const col = db.collection(collection);
+      
+      if (Array.isArray(data)) {
+        const resultado = await col.insertMany(data);
+        return res.status(200).json({
+          success: true,
+          insertedCount: resultado.insertedCount,
+          ids: Object.values(resultado.insertedIds)
+        });
+      }
+
+      const resultado = await col.insertOne({
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      return res.status(200).json({
+        success: true,
+        id: resultado.insertedId,
+        mensaje: '✅ Datos guardados correctamente'
+      });
     }
 
-    const client = await connectToDatabase();
-    const db = client.db(process.env.MONGODB_DB || 'arco-bd');
-    const collection = db.collection('contactos');
+    // ============================================================
+    //  PUT - Actualizar datos
+    // ============================================================
+    if (req.method === 'PUT') {
+      const { collection, id, data } = req.body;
 
-    const resultado = await collection.insertOne({
-      nombre: nombre.trim(),
-      email: email.trim(),
-      telefono: telefono ? telefono.trim() : '',
-      mensaje: mensaje.trim(),
-      fecha: new Date(),
-      leido: false,
-      createdAt: new Date()
-    });
+      if (!collection || !id || !data) {
+        return res.status(400).json({ error: 'Faltan campos: collection, id y data' });
+      }
 
-    return res.status(200).json({
-      success: true,
-      id: resultado.insertedId,
-      mensaje: '✅ Mensaje guardado correctamente'
-    });
+      const col = db.collection(collection);
+      const resultado = await col.updateOne(
+        { _id: new MongoClient.ObjectId(id) },
+        { $set: { ...data, updatedAt: new Date() } }
+      );
+
+      return res.status(200).json({
+        success: true,
+        matchedCount: resultado.matchedCount,
+        modifiedCount: resultado.modifiedCount
+      });
+    }
+
+    // ============================================================
+    //  DELETE - Eliminar datos
+    // ============================================================
+    if (req.method === 'DELETE') {
+      const { collection, id } = req.query;
+
+      if (!collection || !id) {
+        return res.status(400).json({ error: 'Faltan campos: collection y id' });
+      }
+
+      const col = db.collection(collection);
+      const resultado = await col.deleteOne({ _id: new MongoClient.ObjectId(id) });
+
+      return res.status(200).json({
+        success: true,
+        deletedCount: resultado.deletedCount
+      });
+    }
+
+    return res.status(405).json({ error: 'Método no permitido' });
 
   } catch (error) {
-    console.error('❌ Error en API contacto:', error);
+    console.error('❌ Error en API:', error);
     return res.status(500).json({
       error: 'Error interno del servidor',
       details: error.message

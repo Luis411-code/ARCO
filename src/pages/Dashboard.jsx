@@ -1,16 +1,17 @@
+// src/pages/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import HeaderDashboard from './components/HeaderDashboard';
-import Statistics from './components/Statistics';
-import ServiciosManager from './components/ServiciosManager';
-import TestimoniosManager from './components/TestimoniosManager';
-import ConfiguracionGeneral from './components/ConfiguracionGeneral';
-import MensajesManager from './components/MensajesManager';
-import HeroManager from './components/HeroManager';
-import SobreNosotrosManager from './components/SobreNosotrosManager';
-import ServiciosDestacadosManager from './components/ServiciosDestacadosManager';
+import Sidebar from './dashboard/Sidebar';
+import HeaderDashboard from './dashboard/HeaderDashboard';
+import Statistics from './dashboard/Statistics';
+import ServiciosManager from './dashboard/ServiciosManager';
+import TestimoniosManager from './dashboard/TestimoniosManager';
+import ConfiguracionGeneral from './dashboard/ConfiguracionGeneral';
+import MensajesManager from './dashboard/MensajesManager';
+import HeroManager from './dashboard/HeroManager';
+import SobreNosotrosManager from './dashboard/SobreNosotrosManager';
+import ServiciosDestacadosManager from './dashboard/ServiciosDestacadosManager';
 import { useAppContext } from '../context/AppContext';
 
 const Dashboard = () => {
@@ -19,8 +20,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
-  // ===== OBTENER FUNCIONES DEL CONTEXTO =====
   const { 
     setServicios,
     setTestimonios,
@@ -29,7 +30,9 @@ const Dashboard = () => {
     setConfiguracion,
     setHero,
     setSobreNosotros,
-    setServiciosDestacados
+    setServiciosDestacados,
+    syncToMongoDB,
+    loadFromMongoDB
   } = useAppContext();
 
   useEffect(() => {
@@ -44,12 +47,11 @@ const Dashboard = () => {
     navigate('/admin/login');
   };
 
-  // ===== FUNCIÓN DE REFRESCO QUE SÍ RECARGA DATOS =====
+  // ===== REFRESCAR DATOS LOCAL =====
   const handleRefresh = () => {
     setRefreshing(true);
 
     try {
-      // ===== RECARGAR TODOS LOS DATOS DESDE LOCALSTORAGE =====
       const savedServicios = localStorage.getItem('arco_servicios');
       const savedTestimonios = localStorage.getItem('arco_testimonios');
       const savedTestimoniosPendientes = localStorage.getItem('arco_testimonios_pendientes');
@@ -59,7 +61,6 @@ const Dashboard = () => {
       const savedSobreNosotros = localStorage.getItem('arco_sobre_nosotros');
       const savedServiciosDestacados = localStorage.getItem('arco_servicios_destacados');
 
-      // ===== ACTUALIZAR EL ESTADO DEL CONTEXTO =====
       if (savedServicios) setServicios(JSON.parse(savedServicios));
       if (savedTestimonios) setTestimonios(JSON.parse(savedTestimonios));
       if (savedTestimoniosPendientes) setTestimoniosPendientes(JSON.parse(savedTestimoniosPendientes));
@@ -69,17 +70,39 @@ const Dashboard = () => {
       if (savedSobreNosotros) setSobreNosotros(JSON.parse(savedSobreNosotros));
       if (savedServiciosDestacados) setServiciosDestacados(JSON.parse(savedServiciosDestacados));
 
-      // ===== FORZAR RE-RENDER DE COMPONENTES =====
       setRefreshKey(prev => prev + 1);
-
     } catch (error) {
       console.error('Error al recargar datos:', error);
     }
 
-    // ===== ANIMACIÓN DE CARGA =====
     setTimeout(() => {
       setRefreshing(false);
     }, 600);
+  };
+
+  // ===== SINCRONIZAR A MONGODB =====
+  const handleSyncToCloud = async () => {
+    setSyncing(true);
+    const result = await syncToMongoDB();
+    if (result.success) {
+      alert('✅ Datos sincronizados con MongoDB correctamente');
+    } else {
+      alert('❌ Error al sincronizar: ' + result.error);
+    }
+    setSyncing(false);
+  };
+
+  // ===== CARGAR DESDE MONGODB =====
+  const handleLoadFromCloud = async () => {
+    setSyncing(true);
+    const result = await loadFromMongoDB();
+    if (result.success) {
+      alert('✅ Datos cargados desde MongoDB correctamente');
+      setRefreshKey(prev => prev + 1);
+    } else {
+      alert('❌ Error al cargar: ' + result.error);
+    }
+    setSyncing(false);
   };
 
   const renderContent = () => {
@@ -122,6 +145,9 @@ const Dashboard = () => {
           onLogout={handleLogout}
           onRefresh={handleRefresh}
           refreshing={refreshing}
+          onSyncToCloud={handleSyncToCloud}
+          onLoadFromCloud={handleLoadFromCloud}
+          syncing={syncing}
         />
         <motion.main 
           key={activeTab + refreshKey}

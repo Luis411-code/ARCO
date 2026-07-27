@@ -1,3 +1,4 @@
+// src/pages/dashboard/HeaderDashboard.jsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -6,12 +7,15 @@ const HeaderDashboard = ({
   isSidebarOpen, 
   onLogout, 
   onRefresh,
-  refreshing 
+  refreshing,
+  onSyncToCloud,
+  onLoadFromCloud,
+  syncing
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   return (
-    <header className="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
+    <header className="bg-white shadow-sm px-6 py-4 flex items-center justify-between flex-wrap gap-4">
       <div className="flex items-center gap-4">
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -24,38 +28,52 @@ const HeaderDashboard = ({
         <h1 className="text-xl font-bold text-primary">Panel de Administración</h1>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* ===== BOTÓN DE ACTUALIZACIÓN CON INDICADOR ===== */}
+      <div className="flex items-center gap-3 flex-wrap">
+        {/* ===== BOTONES DE SINCRONIZACIÓN ===== */}
+        <button
+          onClick={onSyncToCloud}
+          disabled={syncing}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            syncing 
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+              : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-lg'
+          }`}
+        >
+          {syncing ? '⏳' : '☁️'} {syncing ? 'Sincronizando...' : 'Guardar en Nube'}
+        </button>
+
+        <button
+          onClick={onLoadFromCloud}
+          disabled={syncing}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            syncing 
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+              : 'bg-green-600 hover:bg-green-700 text-white hover:shadow-lg'
+          }`}
+        >
+          {syncing ? '⏳' : '📥'} {syncing ? 'Cargando...' : 'Cargar desde Nube'}
+        </button>
+
+        {/* ===== BOTÓN DE ACTUALIZACIÓN ===== */}
         <button
           onClick={onRefresh}
           disabled={refreshing}
-          className={`p-2 rounded-lg transition-all duration-300 relative ${
+          className={`p-2 rounded-lg transition-all relative ${
             refreshing 
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
               : 'bg-blue-50 text-blue-600 hover:bg-blue-100 hover:scale-105'
           }`}
           title="Actualizar datos del panel"
         >
-          <svg 
-            className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
-            />
+          <svg className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          {/* Punto indicador de actualización */}
           {refreshing && (
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" />
           )}
         </button>
 
-        {/* Fecha y hora */}
+        {/* Fecha */}
         <span className="text-sm text-gray-500 hidden sm:block">
           {new Date().toLocaleDateString('es-ES', { 
             weekday: 'long', 
