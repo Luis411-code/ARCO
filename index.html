@@ -51,32 +51,41 @@
         pointer-events: none;
       }
 
-      /* ===== LOGO REDONDO ===== */
+      /* ===== LOGO CON BORDES REDONDEADOS SUAVES (sin distorsión) ===== */
       .preloader-logo-wrapper {
-        overflow: hidden;
-        border-radius: 50%;
-        box-shadow: 0 0 60px rgba(240, 180, 41, 0.2), 0 0 120px rgba(240, 180, 41, 0.1);
-        border: 3px solid rgba(240, 180, 41, 0.3);
-        animation: pulse-icon 1.5s ease-in-out infinite;
+        background: linear-gradient(135deg, rgba(240, 180, 41, 0.1), rgba(240, 180, 41, 0.02));
+        padding: 12px;
+        border-radius: 28px;
+        box-shadow: 0 0 60px rgba(240, 180, 41, 0.15), 0 0 120px rgba(240, 180, 41, 0.05);
+        border: 2px solid rgba(240, 180, 41, 0.2);
+        animation: pulse-icon 2s ease-in-out infinite;
+        transition: all 0.3s ease;
       }
 
       .preloader-logo-wrapper img {
-        height: 90px;
+        height: 80px;
         width: auto;
         display: block;
-        object-fit: cover;
+        border-radius: 20px;
+        object-fit: contain;
       }
 
       @keyframes pulse-icon {
-        0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(240, 180, 41, 0.2); }
-        50% { transform: scale(1.05); box-shadow: 0 0 80px rgba(240, 180, 41, 0.35); }
+        0%, 100% { 
+          transform: scale(1); 
+          box-shadow: 0 0 60px rgba(240, 180, 41, 0.15);
+        }
+        50% { 
+          transform: scale(1.04); 
+          box-shadow: 0 0 80px rgba(240, 180, 41, 0.25);
+        }
       }
 
       .preloader-number {
         font-size: 40px;
         font-weight: 200;
         color: rgba(255, 255, 255, 0.9);
-        margin-top: 24px;
+        margin-top: 28px;
         font-family: 'Inter', system-ui, sans-serif;
       }
 
@@ -91,7 +100,7 @@
         background: rgba(255, 255, 255, 0.1);
         border-radius: 4px;
         overflow: hidden;
-        margin-top: 12px;
+        margin-top: 14px;
       }
 
       .preloader-bar-fill {
@@ -110,6 +119,18 @@
         text-transform: uppercase;
         margin-top: 16px;
         font-family: 'Inter', system-ui, sans-serif;
+      }
+
+      @media (max-width: 640px) {
+        .preloader-logo-wrapper img {
+          height: 60px;
+        }
+        .preloader-number {
+          font-size: 32px;
+        }
+        .preloader-bar {
+          width: 150px;
+        }
       }
     </style>
   </head>
