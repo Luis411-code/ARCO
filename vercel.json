@@ -5,22 +5,18 @@
   "installCommand": "npm install",
   "framework": "vite",
   "functions": {
-    "src/api/*.js": {
+    "api/*.js": {
       "runtime": "nodejs18.x"
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/src/api/$1"
+      "destination": "/api/$1"
     },
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "MONGODB_DB": "@mongodb_db"
-  }
+  ]
 }

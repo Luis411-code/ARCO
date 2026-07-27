@@ -1,10 +1,8 @@
 // src/components/Contacto.jsx
 import { motion } from 'framer-motion';
-import { useRef, useState } from 'react';
-import { guardarMensaje } from '../api/contacto';
+import { useState } from 'react';
 
 const Contacto = () => {
-  const formRef = useRef();
   const [enviado, setEnviado] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
@@ -22,14 +20,27 @@ const Contacto = () => {
       mensaje: formData.get('mensaje')
     };
 
-    const resultado = await guardarMensaje(datos);
-    
-    if (resultado.success) {
-      setEnviado(true);
-      e.target.reset();
-      setTimeout(() => setEnviado(false), 5000);
-    } else {
-      setError('Error al enviar el mensaje. Intenta de nuevo.');
+    try {
+      const response = await fetch('/api/contacto', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datos)
+      });
+
+      const resultado = await response.json();
+      
+      if (resultado.success) {
+        setEnviado(true);
+        e.target.reset();
+        setTimeout(() => setEnviado(false), 5000);
+      } else {
+        setError(resultado.error || 'Error al enviar el mensaje');
+      }
+    } catch (err) {
+      console.error('Error de conexión:', err);
+      setError('Error de conexión. Intenta de nuevo.');
     }
     
     setCargando(false);
@@ -100,12 +111,6 @@ const Contacto = () => {
                   </div>
                 </div>
               </div>
-
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-500">
-                  📱 También puedes contactarnos por WhatsApp al mismo número.
-                </p>
-              </div>
             </div>
           </motion.div>
 
@@ -125,7 +130,7 @@ const Contacto = () => {
                   <p className="text-sm mt-2">Nos pondremos en contacto contigo pronto.</p>
                 </div>
               ) : (
-                <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   {error && (
                     <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
                       ❌ {error}
@@ -133,7 +138,7 @@ const Contacto = () => {
                   )}
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
                     <input 
                       type="text" 
                       name="nombre"
@@ -143,7 +148,7 @@ const Contacto = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                     <input 
                       type="email" 
                       name="email"
@@ -162,7 +167,7 @@ const Contacto = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje *</label>
                     <textarea 
                       name="mensaje"
                       required
