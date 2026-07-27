@@ -1,6 +1,6 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import Home from './components/Home';
@@ -11,6 +11,7 @@ import Ubicacion from './components/Ubicacion';
 import Presupuesto from './components/Presupuesto';
 import TestimonioForm from './components/TestimonioForm';
 import ScrollToTop from './components/ScrollToTop';
+import { useAppContext } from './context/AppContext';
 
 // Lazy load para el dashboard
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -34,78 +35,105 @@ const AdminLayout = ({ children }) => (
   </div>
 );
 
+function AppContent() {
+  const { loadFromMongoDB, servicios, setServicios } = useAppContext();
+
+  // ===== CARGAR DATOS DESDE MONGODB AL INICIAR LA APP =====
+  useEffect(() => {
+    const cargarDatos = async () => {
+      // Primero intentar cargar desde MongoDB
+      const result = await loadFromMongoDB();
+      
+      if (result.success && result.results) {
+        // Si hay datos en MongoDB, actualizar el contexto
+        if (result.results.servicios && result.results.servicios.length > 0) {
+          setServicios(result.results.servicios);
+        }
+      } else {
+        // Si no hay datos en MongoDB, intentar cargar desde localStorage
+        const savedServicios = localStorage.getItem('arco_servicios');
+        if (savedServicios) {
+          setServicios(JSON.parse(savedServicios));
+        }
+      }
+    };
+
+    cargarDatos();
+  }, []);
+
+  return (
+    <Routes>
+      {/* ===== RUTAS PÚBLICAS ===== */}
+      <Route path="/" element={
+        <PublicLayout>
+          <Home />
+          <Ubicacion />
+        </PublicLayout>
+      } />
+      
+      <Route path="/servicios" element={
+        <PublicLayout>
+          <Servicios />
+        </PublicLayout>
+      } />
+      
+      <Route path="/contacto" element={
+        <PublicLayout>
+          <Contacto />
+        </PublicLayout>
+      } />
+      
+      <Route path="/about" element={
+        <PublicLayout>
+          <About />
+        </PublicLayout>
+      } />
+      
+      <Route path="/presupuesto" element={
+        <PublicLayout>
+          <Presupuesto />
+        </PublicLayout>
+      } />
+      
+      <Route path="/testimonio" element={
+        <PublicLayout>
+          <TestimonioForm />
+        </PublicLayout>
+      } />
+
+      {/* ===== RUTAS DE ADMIN ===== */}
+      <Route path="/admin/login" element={
+        <AdminLayout>
+          <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-primary">
+              <div className="text-white text-xl">Cargando...</div>
+            </div>
+          }>
+            <LoginAdmin />
+          </Suspense>
+        </AdminLayout>
+      } />
+      
+      <Route path="/dashboard/*" element={
+        <AdminLayout>
+          <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+              <div className="text-primary text-xl">Cargando panel...</div>
+            </div>
+          }>
+            <Dashboard />
+          </Suspense>
+        </AdminLayout>
+      } />
+    </Routes>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Routes>
-        {/* ============================================================
-            RUTAS PÚBLICAS - CON HEADER Y FOOTER
-            ============================================================ */}
-        <Route path="/" element={
-          <PublicLayout>
-            <Home />
-            <Ubicacion />
-          </PublicLayout>
-        } />
-        
-        <Route path="/servicios" element={
-          <PublicLayout>
-            <Servicios />
-          </PublicLayout>
-        } />
-        
-        <Route path="/contacto" element={
-          <PublicLayout>
-            <Contacto />
-          </PublicLayout>
-        } />
-        
-        <Route path="/about" element={
-          <PublicLayout>
-            <About />
-          </PublicLayout>
-        } />
-        
-        <Route path="/presupuesto" element={
-          <PublicLayout>
-            <Presupuesto />
-          </PublicLayout>
-        } />
-        
-        <Route path="/testimonio" element={
-          <PublicLayout>
-            <TestimonioForm />
-          </PublicLayout>
-        } />
-
-        {/* ============================================================
-            RUTAS DE ADMIN - SIN HEADER Y SIN FOOTER (Layout separado)
-            ============================================================ */}
-        <Route path="/admin/login" element={
-          <AdminLayout>
-            <Suspense fallback={
-              <div className="min-h-screen flex items-center justify-center bg-primary">
-                <div className="text-white text-xl">Cargando...</div>
-              </div>
-            }>
-              <LoginAdmin />
-            </Suspense>
-          </AdminLayout>
-        } />
-        
-        <Route path="/dashboard/*" element={
-          <AdminLayout>
-            <Suspense fallback={
-              <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <div className="text-primary text-xl">Cargando panel...</div>
-              </div>
-            }>
-              <Dashboard />
-            </Suspense>
-          </AdminLayout>
-        } />
-      </Routes>
+      <AppContent />
     </BrowserRouter>
   );
 }
