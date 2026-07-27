@@ -51,23 +51,32 @@
         pointer-events: none;
       }
 
-      .preloader-icon {
-        height: 80px;
-        width: auto;
+      /* ===== LOGO REDONDO ===== */
+      .preloader-logo-wrapper {
+        overflow: hidden;
+        border-radius: 50%;
+        box-shadow: 0 0 60px rgba(240, 180, 41, 0.2), 0 0 120px rgba(240, 180, 41, 0.1);
+        border: 3px solid rgba(240, 180, 41, 0.3);
         animation: pulse-icon 1.5s ease-in-out infinite;
-        filter: drop-shadow(0 0 30px rgba(240, 180, 41, 0.15));
+      }
+
+      .preloader-logo-wrapper img {
+        height: 90px;
+        width: auto;
+        display: block;
+        object-fit: cover;
       }
 
       @keyframes pulse-icon {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.08); }
+        0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(240, 180, 41, 0.2); }
+        50% { transform: scale(1.05); box-shadow: 0 0 80px rgba(240, 180, 41, 0.35); }
       }
 
       .preloader-number {
         font-size: 40px;
         font-weight: 200;
         color: rgba(255, 255, 255, 0.9);
-        margin-top: 20px;
+        margin-top: 24px;
         font-family: 'Inter', system-ui, sans-serif;
       }
 
@@ -91,6 +100,7 @@
         background: #f0b429;
         border-radius: 4px;
         transition: width 0.15s ease;
+        box-shadow: 0 0 20px rgba(240, 180, 41, 0.3);
       }
 
       .preloader-status {
@@ -106,7 +116,9 @@
   <body>
     <!-- PRELOADER -->
     <div id="preloader">
-      <img src="/logo.png" alt="ARCO" class="preloader-icon" />
+      <div class="preloader-logo-wrapper">
+        <img src="/logo.png" alt="ARCO" />
+      </div>
       <div class="preloader-number">
         <span id="progressNumber">0</span><span class="percent">%</span>
       </div>
