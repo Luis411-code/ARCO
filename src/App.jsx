@@ -16,6 +16,24 @@ import ScrollToTop from './components/ScrollToTop';
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const LoginAdmin = lazy(() => import('./pages/LoginAdmin'));
 
+// ===== LAYOUT PÚBLICO (con Header y Footer) =====
+const PublicLayout = ({ children }) => (
+  <div className="flex flex-col min-h-screen">
+    <Header />
+    <main className="flex-grow pt-20">
+      {children}
+    </main>
+    <Footer />
+  </div>
+);
+
+// ===== LAYOUT DE ADMIN (sin Header ni Footer) =====
+const AdminLayout = ({ children }) => (
+  <div className="min-h-screen">
+    {children}
+  </div>
+);
+
 function App() {
   return (
     <BrowserRouter>
@@ -25,87 +43,67 @@ function App() {
             RUTAS PÚBLICAS - CON HEADER Y FOOTER
             ============================================================ */}
         <Route path="/" element={
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow pt-20">
-              <Home />
-              <Ubicacion />
-            </main>
-            <Footer />
-          </div>
+          <PublicLayout>
+            <Home />
+            <Ubicacion />
+          </PublicLayout>
         } />
         
         <Route path="/servicios" element={
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow pt-20">
-              <Servicios />
-            </main>
-            <Footer />
-          </div>
+          <PublicLayout>
+            <Servicios />
+          </PublicLayout>
         } />
         
         <Route path="/contacto" element={
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow pt-20">
-              <Contacto />
-            </main>
-            <Footer />
-          </div>
+          <PublicLayout>
+            <Contacto />
+          </PublicLayout>
         } />
         
         <Route path="/about" element={
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow pt-20">
-              <About />
-            </main>
-            <Footer />
-          </div>
+          <PublicLayout>
+            <About />
+          </PublicLayout>
         } />
         
         <Route path="/presupuesto" element={
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow pt-20">
-              <Presupuesto />
-            </main>
-            <Footer />
-          </div>
+          <PublicLayout>
+            <Presupuesto />
+          </PublicLayout>
         } />
         
         <Route path="/testimonio" element={
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow pt-20">
-              <TestimonioForm />
-            </main>
-            <Footer />
-          </div>
+          <PublicLayout>
+            <TestimonioForm />
+          </PublicLayout>
         } />
 
         {/* ============================================================
-            RUTAS DE ADMIN - SIN HEADER Y SIN FOOTER
+            RUTAS DE ADMIN - SIN HEADER Y SIN FOOTER (Layout separado)
             ============================================================ */}
         <Route path="/admin/login" element={
-          <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-primary">
-              <div className="text-white text-xl">Cargando...</div>
-            </div>
-          }>
-            <LoginAdmin />
-          </Suspense>
+          <AdminLayout>
+            <Suspense fallback={
+              <div className="min-h-screen flex items-center justify-center bg-primary">
+                <div className="text-white text-xl">Cargando...</div>
+              </div>
+            }>
+              <LoginAdmin />
+            </Suspense>
+          </AdminLayout>
         } />
         
         <Route path="/dashboard/*" element={
-          <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
-              <div className="text-primary text-xl">Cargando panel...</div>
-            </div>
-          }>
-            <Dashboard />
-          </Suspense>
+          <AdminLayout>
+            <Suspense fallback={
+              <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                <div className="text-primary text-xl">Cargando panel...</div>
+              </div>
+            }>
+              <Dashboard />
+            </Suspense>
+          </AdminLayout>
         } />
       </Routes>
     </BrowserRouter>
