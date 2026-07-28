@@ -29,7 +29,7 @@ const Header = () => {
               />
             </div>
             <span className="hidden sm:inline text-xl font-bold text-white transition-colors duration-300 group-hover:text-secondary">
-              ARCO
+              
             </span>
           </Link>
 

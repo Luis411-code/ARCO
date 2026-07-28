@@ -17,7 +17,7 @@ const Footer = () => {
               <div className="bg-white/95 backdrop-blur-sm rounded-xl p-1.5 shadow-lg shadow-primary/20 border border-white/30">
                 <img src="/logo.png" alt="ARCO" className="h-10 w-auto object-cover" />
               </div>
-              <h3 className="text-xl font-bold text-secondary">ARCO</h3>
+              <h3 className="text-xl font-bold text-secondary"></h3>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
               Publicidad y Comunicación Gráfica. Transformamos ideas en 
