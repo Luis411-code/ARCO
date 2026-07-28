@@ -14,12 +14,27 @@ export async function getConfiguracion() {
 }
 
 export async function updateConfiguracion(config) {
+  const configData = {
+    nombre_empresa: config.nombre_empresa,
+    slogan: config.slogan,
+    telefono1: config.telefono1,
+    telefono2: config.telefono2,
+    whatsapp: config.whatsapp,
+    direccion: config.direccion,
+    email: config.email,
+    horario: config.horario,
+    admin_email: config.admin_email,
+    admin_password: config.admin_password,
+    categorias: config.categorias || [] // 👈 Asegurar que se guarde
+  };
+
   const { data, error } = await supabase
     .from(TABLAS.CONFIGURACION)
-    .update(config)
+    .update(configData)
     .eq('id', 1)
     .select()
     .single();
+  
   if (error) throw error;
   return data;
 }
@@ -48,48 +63,39 @@ export async function updateHero(heroData) {
 }
 
 // ============================================================
-// SOBRE NOSOTROS Y VALORES (CORREGIDO)
+// SOBRE NOSOTROS Y VALORES
 // ============================================================
 export async function getSobreNosotros() {
-  // Obtener sobre_nosotros
   const { data: sobre, error: error1 } = await supabase
     .from(TABLAS.SOBRE_NOSOTROS)
     .select('*')
     .single();
   if (error1) throw error1;
 
-  // Obtener valores por separado
   const { data: valores, error: error2 } = await supabase
     .from(TABLAS.VALORES)
     .select('*')
     .eq('sobre_nosotros_id', 1);
   if (error2) throw error2;
 
-  // Combinar en un solo objeto
   return { ...sobre, valores: valores || [] };
 }
 
 export async function updateSobreNosotros(data) {
-  // Extraer valores del objeto data
   const { valores, ...sobreData } = data;
   
-  // 1. Actualizar sobre_nosotros
   const { error: error1 } = await supabase
     .from(TABLAS.SOBRE_NOSOTROS)
     .update(sobreData)
     .eq('id', 1);
   if (error1) throw error1;
 
-  // 2. Si hay valores, actualizarlos
   if (valores && Array.isArray(valores) && valores.length > 0) {
-    // Eliminar valores existentes
-    const { error: deleteError } = await supabase
+    await supabase
       .from(TABLAS.VALORES)
       .delete()
       .eq('sobre_nosotros_id', 1);
-    if (deleteError) throw deleteError;
     
-    // Insertar nuevos valores
     const nuevosValores = valores.map(v => ({
       sobre_nosotros_id: 1,
       icono: v.icono || '🎯',
@@ -97,10 +103,10 @@ export async function updateSobreNosotros(data) {
       descripcion: v.descripcion || 'Descripción del valor'
     }));
     
-    const { error: insertError } = await supabase
+    const { error: error2 } = await supabase
       .from(TABLAS.VALORES)
       .insert(nuevosValores);
-    if (insertError) throw insertError;
+    if (error2) throw error2;
   }
 
   return { success: true };
@@ -165,28 +171,6 @@ export async function deleteServicio(id) {
 // ============================================================
 // SERVICIOS DESTACADOS
 // ============================================================
-export async function updateServiciosDestacados(destacados) {
-  // Eliminar existentes
-  await supabase
-    .from(TABLAS.SERVICIOS_DESTACADOS)
-    .delete()
-    .neq('id', 0);
-  
-  // Insertar nuevos con la estructura correcta
-  const nuevosDestacados = destacados.map(item => ({
-    servicio_id: item.servicioId || item.servicio_id, // 👈 Asegurar el nombre correcto
-    titulo: item.titulo || '',
-    descripcion: item.descripcion || ''
-  }));
-  
-  const { error } = await supabase
-    .from(TABLAS.SERVICIOS_DESTACADOS)
-    .insert(nuevosDestacados);
-  
-  if (error) throw error;
-  return { success: true };
-}
-
 export async function getServiciosDestacados() {
   const { data, error } = await supabase
     .from(TABLAS.SERVICIOS_DESTACADOS)
@@ -202,6 +186,28 @@ export async function getServiciosDestacados() {
   }));
   
   return transformedData;
+}
+
+export async function updateServiciosDestacados(destacados) {
+  // Eliminar existentes
+  await supabase
+    .from(TABLAS.SERVICIOS_DESTACADOS)
+    .delete()
+    .neq('id', 0);
+  
+  // Insertar nuevos con la estructura correcta
+  const nuevosDestacados = destacados.map(item => ({
+    servicio_id: item.servicioId || item.servicio_id,
+    titulo: item.titulo || '',
+    descripcion: item.descripcion || ''
+  }));
+  
+  const { error } = await supabase
+    .from(TABLAS.SERVICIOS_DESTACADOS)
+    .insert(nuevosDestacados);
+  
+  if (error) throw error;
+  return { success: true };
 }
 
 // ============================================================

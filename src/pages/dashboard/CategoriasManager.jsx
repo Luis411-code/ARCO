@@ -21,6 +21,7 @@ const CategoriasManager = () => {
   const [nuevaCategoria, setNuevaCategoria] = useState('');
   const [editandoIndex, setEditandoIndex] = useState(null);
   const [editandoValor, setEditandoValor] = useState('');
+  const [guardando, setGuardando] = useState(false);
 
   const handleAgregar = () => {
     if (!nuevaCategoria.trim()) {
@@ -64,11 +65,26 @@ const CategoriasManager = () => {
   };
 
   const handleGuardar = async () => {
-    const result = await actualizarConfiguracion({ categorias });
-    if (result.success) {
-      await loadFromSupabase();
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+    try {
+      setGuardando(true);
+      // Guardar categorías en la configuración
+      const result = await actualizarConfiguracion({ 
+        ...configuracion, 
+        categorias: categorias 
+      });
+      
+      if (result.success) {
+        await loadFromSupabase();
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      } else {
+        alert('❌ Error al guardar: ' + (result.error || 'Error desconocido'));
+      }
+    } catch (error) {
+      console.error('Error guardando categorías:', error);
+      alert('❌ Error al guardar categorías');
+    } finally {
+      setGuardando(false);
     }
   };
 
@@ -78,9 +94,12 @@ const CategoriasManager = () => {
         <h2 className="text-2xl font-bold text-primary">🏷️ Gestión de Categorías</h2>
         <button
           onClick={handleGuardar}
-          className="bg-gradient-to-r from-primary to-blue-700 text-white px-4 py-2 rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-105"
+          disabled={guardando}
+          className={`bg-gradient-to-r from-primary to-blue-700 text-white px-4 py-2 rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-105 ${
+            guardando ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         >
-          💾 Guardar Cambios
+          {guardando ? '⏳ Guardando...' : '💾 Guardar Cambios'}
         </button>
       </div>
 
@@ -119,7 +138,7 @@ const CategoriasManager = () => {
             {categorias.map((categoria, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between gap-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200"
+                className="flex items-center justify-between gap-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 hover:border-secondary/50 transition-colors"
               >
                 {editandoIndex === index ? (
                   <input
