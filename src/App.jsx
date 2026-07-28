@@ -1,5 +1,5 @@
-// src/App.jsx
-import { BrowserRouter, Routes, Route, lazy, Suspense, useEffect } from 'react';
+// src/App.jsx (CORREGIDO)
+import { BrowserRouter, Routes, Route, useEffect } from 'react-router-dom';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import Home from './components/Home';
@@ -12,9 +12,9 @@ import TestimonioForm from './components/TestimonioForm';
 import ScrollToTop from './components/ScrollToTop';
 import { useAppContext } from './context/AppContext';
 
-// Lazy load para el dashboard
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const LoginAdmin = lazy(() => import('./pages/LoginAdmin'));
+// 👇 IMPORTACIÓN DIRECTA (SIN LAZY)
+import Dashboard from './pages/Dashboard';
+import LoginAdmin from './pages/LoginAdmin';
 
 // ===== LAYOUT PÚBLICO =====
 const PublicLayout = ({ children }) => (
@@ -27,17 +27,9 @@ const PublicLayout = ({ children }) => (
   </div>
 );
 
-// ===== LAYOUT DE ADMIN =====
-const AdminLayout = ({ children }) => (
-  <div className="min-h-screen">
-    {children}
-  </div>
-);
-
 function AppContent() {
   const { loadFromSupabase, setServicios } = useAppContext();
 
-  // ===== CARGAR DATOS DESDE SUPABASE AL INICIAR =====
   useEffect(() => {
     const cargarDatos = async () => {
       console.log('📥 Cargando datos desde Supabase...');
@@ -97,30 +89,9 @@ function AppContent() {
         </PublicLayout>
       } />
 
-      {/* ===== RUTAS DE ADMIN ===== */}
-      <Route path="/admin/login" element={
-        <AdminLayout>
-          <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-primary">
-              <div className="text-white text-xl">Cargando...</div>
-            </div>
-          }>
-            <LoginAdmin />
-          </Suspense>
-        </AdminLayout>
-      } />
-      
-      <Route path="/dashboard/*" element={
-        <AdminLayout>
-          <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
-              <div className="text-primary text-xl">Cargando panel...</div>
-            </div>
-          }>
-            <Dashboard />
-          </Suspense>
-        </AdminLayout>
-      } />
+      {/* ===== RUTAS DE ADMIN (SIN LAZY) ===== */}
+      <Route path="/admin/login" element={<LoginAdmin />} />
+      <Route path="/dashboard/*" element={<Dashboard />} />
     </Routes>
   );
 }
