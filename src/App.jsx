@@ -1,5 +1,6 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route, useEffect } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react'; // ✅ useEffect viene de react, NO de react-router-dom
 
 // Layouts
 import Header from './components/Layout/Header';
