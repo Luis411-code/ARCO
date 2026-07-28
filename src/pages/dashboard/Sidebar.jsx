@@ -19,11 +19,16 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
       initial={{ width: isOpen ? 280 : 80 }}
       animate={{ width: isOpen ? 280 : 80 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="bg-slate-900 h-screen flex-shrink-0 overflow-hidden shadow-lg z-20"
+      className="h-screen flex-shrink-0 overflow-hidden shadow-lg z-20"
+      style={{
+        background: 'rgba(10, 22, 40, 0.85)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRight: '1px solid rgba(255,255,255,0.08)'
+      }}
     >
       <div className="flex items-center justify-center h-20 border-b border-white/10 px-3">
         <Link to="/dashboard" className="flex items-center gap-3">
-          {/* ===== LOGO CON FONDO BLANCO ===== */}
           <div className="bg-white/95 rounded-xl p-1 shadow-lg shadow-primary/20 border border-white/30 flex-shrink-0">
             <img src="/logo.png" alt="ARCO" className="h-10 w-auto object-contain" />
           </div>
@@ -51,7 +56,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
               w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
               ${activeTab === item.id 
                 ? 'bg-secondary/20 text-secondary' 
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                : 'text-white/60 hover:text-white hover:bg-white/5'
               }
             `}
           >
