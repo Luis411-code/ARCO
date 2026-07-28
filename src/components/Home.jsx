@@ -1,3 +1,4 @@
+// src/components/Home.jsx
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useEffect, useState } from 'react';
@@ -10,7 +11,8 @@ const Home = () => {
     servicios, 
     testimonios, 
     configuracion,
-    serviciosDestacados
+    serviciosDestacados,
+    loadFromSupabase
   } = useAppContext();
 
   const [ref, inView] = useInView({
@@ -37,10 +39,7 @@ const Home = () => {
     }
   }, [inView]);
 
-  // ===== FILTRAR SOLO TESTIMONIOS APROBADOS =====
   const testimoniosAprobados = testimonios.filter(t => t.aprobado !== false);
-
-  // ===== SERVICIOS DESTACADOS (usar los del contexto) =====
   const destacados = serviciosDestacados || [];
 
   const fadeInUp = {
@@ -55,10 +54,8 @@ const Home = () => {
 
   return (
     <div className="overflow-hidden">
-      {/* ===== HERO CON ANIMACIÓN 3D ===== */}
       <HeroVisualLite />
 
-      {/* ===== SECCIÓN "SOBRE NOSOTROS" ===== */}
       <section className="py-20 bg-white" ref={ref}>
         <div className="container mx-auto px-4">
           <motion.div
@@ -70,29 +67,29 @@ const Home = () => {
           >
             <span className="text-secondary font-semibold text-sm uppercase tracking-wider">Sobre nosotros</span>
             <h2 className="text-3xl md:text-4xl font-bold text-primary mt-2 mb-4">
-              {configuracion.sobreNosotros?.titulo || 'Expertos en Comunicación Visual'}
+              {configuracion?.sobreNosotros?.titulo || 'Expertos en Comunicación Visual'}
             </h2>
             <p className="text-gray-600 leading-relaxed">
-              {configuracion.sobreNosotros?.descripcion || 'En ARCO transformamos ideas en soluciones gráficas de alto impacto. Con años de experiencia en el sector, ofrecemos productos de calidad con garantía de un año.'}
+              {configuracion?.sobreNosotros?.descripcion || 'En ARCO transformamos ideas en soluciones gráficas de alto impacto. Con años de experiencia en el sector, ofrecemos productos de calidad con garantía de un año.'}
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {(configuracion.sobreNosotros?.valores || [
+            {(configuracion?.sobreNosotros?.valores || [
               {
-                icon: "🎨",
-                title: "Diseño Creativo",
-                desc: "Convertimos tus ideas en diseños únicos que capturan la esencia de tu marca."
+                icono: "🎨",
+                titulo: "Diseño Creativo",
+                descripcion: "Convertimos tus ideas en diseños únicos que capturan la esencia de tu marca."
               },
               {
-                icon: "🔧",
-                title: "Calidad Garantizada",
-                desc: "Materiales de primera calidad: PVC, acrílico y vinilo autoadhesivo. Garantía de 1 año."
+                icono: "🔧",
+                titulo: "Calidad Garantizada",
+                descripcion: "Materiales de primera calidad: PVC, acrílico y vinilo autoadhesivo. Garantía de 1 año."
               },
               {
-                icon: "📦",
-                title: "Soluciones Integrales",
-                desc: "Desde el diseño hasta la instalación, ofrecemos un servicio completo y personalizado."
+                icono: "📦",
+                titulo: "Soluciones Integrales",
+                descripcion: "Desde el diseño hasta la instalación, ofrecemos un servicio completo y personalizado."
               }
             ]).map((item, index) => (
               <motion.div
@@ -103,14 +100,13 @@ const Home = () => {
                 transition={{ delay: index * 0.15, duration: 0.5 }}
                 className="group bg-white p-8 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100"
               >
-                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform inline-block">{item.icon}</div>
-                <h3 className="text-xl font-bold text-primary mb-3">{item.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{item.desc}</p>
+                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform inline-block">{item.icono}</div>
+                <h3 className="text-xl font-bold text-primary mb-3">{item.titulo}</h3>
+                <p className="text-gray-600 leading-relaxed">{item.descripcion}</p>
               </motion.div>
             ))}
           </div>
 
-          {/* Estadísticas */}
           <motion.div
             initial="hidden"
             animate={inView ? "visible" : "hidden"}
@@ -134,7 +130,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ===== SECCIÓN DE SERVICIOS DESTACADOS ===== */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <motion.div
@@ -177,58 +172,12 @@ const Home = () => {
                 </motion.div>
               ))
             ) : (
-              // Fallback si no hay servicios destacados en el contexto
-              [
-                {
-                  icono: '💡',
-                  titulo: 'Cartelería Lumínica',
-                  descripcion: 'Carteles con iluminación LED de bajo consumo, larga durabilidad y alta visibilidad. Ideales para exteriores.',
-                  link: '/servicios'
-                },
-                {
-                  icono: '🪧',
-                  titulo: 'Cartelería No Lumínica',
-                  descripcion: 'Carteles identificativos, señalética y rótulos para interiores y exteriores con materiales de alta resistencia.',
-                  link: '/servicios'
-                },
-                {
-                  icono: '🖨️',
-                  titulo: 'Impresión y Serigrafía',
-                  descripcion: 'Gigantografías, pendones, doyles, posavasos, cartas menú y serigrafía sobre textiles.',
-                  link: '/servicios'
-                },
-                {
-                  icono: '🔧',
-                  titulo: 'Levantamiento y Montaje',
-                  descripcion: 'Levantamiento, diseño, instalación, mantenimiento y ambientación de interiores y exteriores.',
-                  link: '/servicios'
-                }
-              ].map((service, index) => (
-                <motion.div
-                  key={index}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  variants={scaleUp}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 group"
-                >
-                  <div className="bg-gradient-to-br from-primary to-blue-700 w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
-                    <span className="text-white">{service.icono}</span>
-                  </div>
-                  <h3 className="text-lg font-bold text-primary mb-2">{service.titulo}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{service.descripcion}</p>
-                  <Link to={service.link} className="text-secondary font-semibold text-sm inline-flex items-center gap-1 mt-3 hover:gap-2 transition-all">
-                    Saber más →
-                  </Link>
-                </motion.div>
-              ))
+              <p className="text-gray-500 text-center col-span-full">Cargando servicios destacados...</p>
             )}
           </div>
         </div>
       </section>
 
-      {/* ===== SECCIÓN DE TESTIMONIOS (SOLO APROBADOS) ===== */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <motion.div
@@ -244,7 +193,7 @@ const Home = () => {
               Lo que dicen nuestros clientes
             </h2>
             <p className="text-gray-600">
-              Opiniones reales de empresas que confían en {configuracion.nombreEmpresa || 'ARCO'}.
+              Opiniones reales de empresas que confían en {configuracion?.nombre_empresa || 'ARCO'}.
             </p>
           </motion.div>
 
@@ -285,7 +234,6 @@ const Home = () => {
             </div>
           )}
 
-          {/* ===== BOTÓN PARA DEJAR TESTIMONIO ===== */}
           <div className="text-center mt-10">
             <Link
               to="/testimonio"
@@ -297,7 +245,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ===== CTA FINAL ===== */}
       <section className="py-16 bg-gradient-to-r from-primary to-blue-800">
         <div className="container mx-auto px-4 text-center">
           <motion.div

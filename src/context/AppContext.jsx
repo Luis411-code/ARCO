@@ -28,7 +28,6 @@ import {
   getServiciosDestacados
 } from '../services/supabaseService';
 
-// ===== DATOS INICIALES =====
 const initialData = {
   configuracion: {
     nombre_empresa: 'ARCO',
@@ -84,7 +83,6 @@ export const useAppContext = () => {
 };
 
 export const AppProvider = ({ children }) => {
-  // ===== ESTADOS =====
   const [configuracion, setConfiguracion] = useState(() => {
     const saved = localStorage.getItem('arco_configuracion');
     return saved ? JSON.parse(saved) : initialData.configuracion;
@@ -127,7 +125,6 @@ export const AppProvider = ({ children }) => {
 
   const [cargando, setCargando] = useState(false);
 
-  // ===== GUARDAR EN LOCALSTORAGE =====
   useEffect(() => {
     localStorage.setItem('arco_configuracion', JSON.stringify(configuracion));
   }, [configuracion]);
@@ -160,10 +157,6 @@ export const AppProvider = ({ children }) => {
     localStorage.setItem('arco_mensajes', JSON.stringify(mensajes));
   }, [mensajes]);
 
-  // ============================================================
-  //  FUNCIONES LOCALES (actualización de estado)
-  // ============================================================
-  
   const updateConfiguracionLocal = (data) => {
     setConfiguracion({ ...configuracion, ...data });
   };
@@ -244,11 +237,6 @@ export const AppProvider = ({ children }) => {
     setMensajes(mensajes.filter(m => m.id !== id));
   };
 
-  // ============================================================
-  //  🗄️ FUNCIONES PARA SUPABASE (CON SINCRONIZACIÓN)
-  // ============================================================
-
-  // ===== CARGAR DATOS DESDE SUPABASE =====
   const loadFromSupabase = useCallback(async () => {
     try {
       setCargando(true);
@@ -261,7 +249,6 @@ export const AppProvider = ({ children }) => {
       if (data.servicios) setServicios(data.servicios);
       if (data.testimonios) setTestimonios(data.testimonios);
       
-      // Cargar testimonios pendientes
       const pendientes = await getTestimoniosPendientes();
       setTestimoniosPendientes(pendientes);
       
@@ -275,12 +262,10 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
-  // ===== SINCRONIZAR DATOS A SUPABASE =====
   const syncToSupabase = useCallback(async () => {
     try {
       setCargando(true);
       
-      // Preparar datos
       const data = {
         configuracion,
         hero,
@@ -301,8 +286,6 @@ export const AppProvider = ({ children }) => {
     }
   }, [configuracion, hero, sobreNosotros, serviciosDestacados, servicios, testimonios]);
 
-  // ===== FUNCIONES CON SUPABASE (CRUD) =====
-  
   const guardarMensaje = useCallback(async (mensaje) => {
     try {
       const nuevo = await createMensaje(mensaje);
@@ -328,7 +311,6 @@ export const AppProvider = ({ children }) => {
   const aprobarTestimonioConSupabase = useCallback(async (id) => {
     try {
       await aprobarTestimonio(id);
-      // Recargar listas
       const [aprobados, pendientes] = await Promise.all([
         getTestimonios(true),
         getTestimoniosPendientes()
@@ -399,7 +381,6 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
-  // ===== FUNCIONES PARA SERVICIOS CON SUPABASE =====
   const agregarServicio = useCallback(async (servicio) => {
     try {
       const nuevo = await createServicio(servicio);
@@ -433,7 +414,6 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
-  // ===== FUNCIONES DE CONFIGURACIÓN CON SUPABASE =====
   const actualizarConfiguracion = useCallback(async (data) => {
     try {
       const actualizado = await updateConfiguracion(data);
@@ -478,12 +458,7 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
-  // ============================================================
-  //  EXPORTAR VALORES
-  // ============================================================
-
   const value = {
-    // ===== DATOS =====
     configuracion,
     hero,
     sobreNosotros,
@@ -494,13 +469,11 @@ export const AppProvider = ({ children }) => {
     mensajes,
     cargando,
 
-    // ===== SETTERS (para uso local) =====
     setServicios,
     setTestimonios,
     setTestimoniosPendientes,
     setMensajes,
 
-    // ===== FUNCIONES LOCALES (para el dashboard) =====
     updateConfiguracion: updateConfiguracionLocal,
     updateHero: updateHeroLocal,
     updateSobreNosotros: updateSobreNosotrosLocal,
@@ -517,7 +490,6 @@ export const AppProvider = ({ children }) => {
     marcarRespondido: marcarRespondidoLocal,
     deleteMensaje: deleteMensajeLocal,
 
-    // ===== FUNCIONES CON SUPABASE =====
     loadFromSupabase,
     syncToSupabase,
     guardarMensaje,

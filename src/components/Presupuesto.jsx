@@ -1,3 +1,4 @@
+// src/components/Presupuesto.jsx
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -14,10 +15,8 @@ const Presupuesto = () => {
   const [enviado, setEnviado] = useState(false);
   const [formData, setFormData] = useState({});
 
-  // ===== NÚMERO DE WHATSAPP =====
   const WHATSAPP_NUMBER = '5359342808';
 
-  // ===== PRESELECCIONAR SERVICIO DESDE URL =====
   useEffect(() => {
     if (servicioId) {
       const servicio = servicios.find(s => s.id === servicioId);
@@ -28,7 +27,6 @@ const Presupuesto = () => {
     }
   }, [servicioId, servicios]);
 
-  // ===== MANEJADORES =====
   const handleSeleccionarServicio = (servicio) => {
     setServicioSeleccionado(servicio);
     setPaso(2);
@@ -46,7 +44,6 @@ const Presupuesto = () => {
     });
   };
 
-  // ===== VALIDACIÓN DE TELÉFONO =====
   const handlePhoneChange = (e) => {
     const value = e.target.value.replace(/[^0-9+ ]/g, '');
     setFormData({
@@ -55,12 +52,11 @@ const Presupuesto = () => {
     });
   };
 
-  // ===== ENVÍO A WHATSAPP =====
   const handleSubmit = (e) => {
     e.preventDefault();
 
     const servicio = servicioSeleccionado;
-    const campos = servicio.camposFormulario || [];
+    const campos = servicio.campos_formulario || []; // ✅ CAMBIADO: campos_formulario
 
     let mensaje = `Hola ARCO, vengo de su página web y quiero solicitar un presupuesto:%0A%0A` +
       `📌 *Solicitud de Presupuesto*%0A` +
@@ -68,7 +64,6 @@ const Presupuesto = () => {
       `🛠️ *Servicio:* ${servicio.titulo}%0A` +
       `%0A`;
 
-    // 👇 RECORRER CAMPOS DINÁMICOS DEL FORMULARIO
     campos.forEach(campo => {
       const valor = formData[campo.id] || 'No especificado';
       mensaje += `📌 *${campo.label}:* ${valor}%0A`;
@@ -89,15 +84,13 @@ const Presupuesto = () => {
     }, 2500);
   };
 
-  // ===== RENDER FORMULARIO =====
   const renderFormulario = () => {
     if (!servicioSeleccionado) return null;
 
-    const campos = servicioSeleccionado.camposFormulario || [];
+    const campos = servicioSeleccionado.campos_formulario || []; // ✅ CAMBIADO
 
     return (
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Galería de ejemplos */}
         {servicioSeleccionado.imagenes && servicioSeleccionado.imagenes.length > 0 && (
           <div className="mb-6">
             <h3 className="text-sm font-semibold text-gray-700 mb-3">📸 Ejemplos de trabajos realizados</h3>
@@ -117,7 +110,6 @@ const Presupuesto = () => {
           </div>
         )}
 
-        {/* ===== CAMPOS DINÁMICOS DEL FORMULARIO ===== */}
         {campos.length > 0 ? (
           campos.map((campo) => (
             <div key={campo.id}>
@@ -166,13 +158,11 @@ const Presupuesto = () => {
             </div>
           ))
         ) : (
-          // Si no hay campos configurados, mostrar un mensaje
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-yellow-700 text-sm">
-            ⚠️ Este servicio no tiene campos configurados. Por favor, contacta directamente por WhatsApp.
+            ⚠️ Este servicio no tiene campos configurados. Por favor, contacta directamente por WhatsApp al <strong>5359342808</strong>.
           </div>
         )}
 
-        {/* Datos de contacto (siempre presentes) */}
         <div className="border-t border-gray-200 pt-4 mt-4">
           <h3 className="text-lg font-bold text-primary mb-4">📋 Datos de contacto</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -242,7 +232,6 @@ const Presupuesto = () => {
     );
   };
 
-  // ===== RENDER LISTADO =====
   const renderListado = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {servicios.map((servicio) => (
@@ -260,7 +249,7 @@ const Presupuesto = () => {
               <h3 className="font-bold text-primary group-hover:text-secondary transition-colors">
                 {servicio.titulo}
               </h3>
-              <p className="text-sm text-gray-500 mt-1">{servicio.desc}</p>
+              <p className="text-sm text-gray-500 mt-1">{servicio.descripcion}</p>
               <div className="flex items-center justify-between mt-3">
                 <span className="text-sm font-semibold text-secondary">{servicio.precio || 'Consultar'}</span>
                 <span className="text-sm text-primary font-medium group-hover:translate-x-1 transition-transform">
@@ -279,10 +268,9 @@ const Presupuesto = () => {
                   )}
                 </div>
               )}
-              {/* Mostrar cuántos campos tiene el formulario */}
               <div className="mt-2">
                 <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                  {servicio.camposFormulario?.length || 0} campos en el formulario
+                  {servicio.campos_formulario?.length || 0} campos en el formulario
                 </span>
               </div>
             </div>

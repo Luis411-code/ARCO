@@ -1,12 +1,8 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
-
-// Layouts
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
-
-// Páginas públicas
 import Home from './components/Home';
 import Servicios from './components/Servicios';
 import Contacto from './components/Contacto';
@@ -15,13 +11,9 @@ import Ubicacion from './components/Ubicacion';
 import Presupuesto from './components/Presupuesto';
 import TestimonioForm from './components/TestimonioForm';
 import ScrollToTop from './components/ScrollToTop';
-
-// Dashboard
+import { useAppContext } from './context/AppContext';
 import Dashboard from './pages/Dashboard';
 import LoginAdmin from './pages/LoginAdmin';
-
-// Contexto
-import { useAppContext } from './context/AppContext';
 
 const PublicLayout = ({ children }) => (
   <div className="flex flex-col min-h-screen">
@@ -35,10 +27,9 @@ const PublicLayout = ({ children }) => (
 
 function AppRoutes() {
   const { loadFromSupabase, setServicios } = useAppContext();
-  const hasLoaded = useRef(false); // 👈 Para evitar que se ejecute más de una vez
+  const hasLoaded = useRef(false);
 
   useEffect(() => {
-    // 👇 Solo ejecutar una vez
     if (hasLoaded.current) return;
     hasLoaded.current = true;
 
@@ -54,7 +45,7 @@ function AppRoutes() {
       }
     };
     cargarDatos();
-  }, [loadFromSupabase, setServicios]); // 👈 Dependencias necesarias
+  }, [loadFromSupabase, setServicios]);
 
   return (
     <Routes>

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
 
 const HeroManager = () => {
-  const { hero, actualizarHero } = useAppContext();
+  const { hero, actualizarHero, loadFromSupabase } = useAppContext();
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState(hero);
 
@@ -19,6 +19,7 @@ const HeroManager = () => {
     e.preventDefault();
     const result = await actualizarHero(formData);
     if (result.success) {
+      await loadFromSupabase();
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     }
