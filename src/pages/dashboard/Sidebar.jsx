@@ -23,7 +23,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
     >
       <div className="flex items-center justify-center h-20 border-b border-white/10 px-3">
         <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="overflow-hidden rounded-full shadow-lg shadow-secondary/20 border-2 border-secondary/30 flex-shrink-0">
+          <div className="overflow-hidden rounded-xl shadow-lg shadow-secondary/20 border-2 border-secondary/30 bg-white/10 backdrop-blur-sm p-1.5 flex-shrink-0">
             <img src="/logo.png" alt="ARCO" className="h-10 w-auto object-cover" />
           </div>
           {isOpen && (

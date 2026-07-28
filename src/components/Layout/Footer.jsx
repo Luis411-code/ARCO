@@ -14,7 +14,7 @@ const Footer = () => {
             transition={{ duration: 0.5 }}
           >
             <div className="flex items-center space-x-3 mb-4">
-              <div className="overflow-hidden rounded-full shadow-lg shadow-secondary/20 border-2 border-secondary/30">
+              <div className="overflow-hidden rounded-xl shadow-lg shadow-secondary/20 border-2 border-secondary/30 bg-white/10 backdrop-blur-sm p-1.5">
                 <img src="/logo.png" alt="ARCO" className="h-10 w-auto object-cover" />
               </div>
               <h3 className="text-xl font-bold text-secondary">ARCO</h3>

@@ -19,16 +19,21 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-primary shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          {/* Logo - Con borde redondeado y sombra */}
+          {/* 👇 LOGO MEJORADO */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="overflow-hidden rounded-full shadow-lg shadow-secondary/20 border-2 border-secondary/30 transition-all duration-300 group-hover:shadow-secondary/40 group-hover:scale-105">
-              <img
-                src="/logo.png"
-                alt="ARCO"
-                className="h-12 w-auto object-cover"
-              />
+            <div className="relative">
+              {/* Fondo blanco/transparente detrás del logo */}
+              <div className="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-xl -m-2 p-2"></div>
+              <div className="relative overflow-hidden rounded-xl shadow-lg shadow-secondary/20 border-2 border-secondary/30 transition-all duration-300 group-hover:shadow-secondary/40 group-hover:scale-105 bg-white/10 backdrop-blur-sm p-1.5">
+                <img
+                  src="/logo.png"
+                  alt="ARCO"
+                  className="h-12 w-auto object-cover"
+                />
+              </div>
             </div>
             <span className="hidden sm:inline text-xl font-bold text-white transition-colors duration-300 group-hover:text-secondary">
+              ARCO
             </span>
           </Link>
 
@@ -67,7 +72,6 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden py-4 border-t border-white/10 space-y-1">
             {navItems.map((item) => (
