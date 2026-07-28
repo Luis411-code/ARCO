@@ -1,4 +1,4 @@
-// src/App.jsx (CORREGIDO)
+// src/App.jsx
 import { BrowserRouter, Routes, Route, useEffect } from 'react-router-dom';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
