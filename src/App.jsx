@@ -1,6 +1,6 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react'; // ✅ useEffect viene de react, NO de react-router-dom
+import { useEffect, useRef } from 'react';
 
 // Layouts
 import Header from './components/Layout/Header';
@@ -35,8 +35,13 @@ const PublicLayout = ({ children }) => (
 
 function AppRoutes() {
   const { loadFromSupabase, setServicios } = useAppContext();
+  const hasLoaded = useRef(false); // 👈 Para evitar que se ejecute más de una vez
 
   useEffect(() => {
+    // 👇 Solo ejecutar una vez
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
+
     const cargarDatos = async () => {
       console.log('📥 Cargando datos desde Supabase...');
       const result = await loadFromSupabase();
@@ -49,7 +54,7 @@ function AppRoutes() {
       }
     };
     cargarDatos();
-  }, [loadFromSupabase, setServicios]);
+  }, [loadFromSupabase, setServicios]); // 👈 Dependencias necesarias
 
   return (
     <Routes>
