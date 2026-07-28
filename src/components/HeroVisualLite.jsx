@@ -2,9 +2,11 @@
 import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useAppContext } from '../context/AppContext';
 
 const HeroVisualLite = () => {
   const canvasRef = useRef(null);
+  const { hero } = useAppContext(); // 👈 Obtener datos del contexto
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -91,20 +93,26 @@ const HeroVisualLite = () => {
     };
   }, []);
 
+  // 👇 Usar datos del contexto con fallback
+  const etiqueta = hero?.etiqueta || '🎯 Publicidad y Comunicación Gráfica';
+  const titulo = hero?.titulo || 'Transformamos tus';
+  const subtitulo = hero?.subtitulo || 'ideas en impacto visual';
+  const descripcion = hero?.descripcion || 'Soluciones integrales en artes gráficas: cartelería, señalética, impresión y diseño. Calidad y garantía en cada proyecto.';
+  const boton_texto = hero?.boton_texto || 'Ver Servicios';
+  const boton_link = hero?.boton_link || '/servicios';
+
   return (
     <section className="relative w-full h-screen flex items-center bg-gradient-to-br from-slate-900 via-primary to-slate-800 overflow-hidden">
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
       
       <div className="relative z-10 container mx-auto px-4 text-center">
-        {/* ===== LOGO ELIMINADO ===== */}
-        
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           <div className="inline-block bg-secondary/20 backdrop-blur-sm px-6 py-2 rounded-full text-secondary font-semibold text-sm mb-6 border border-secondary/30">
-            🎯 Publicidad y Comunicación Gráfica
+            {etiqueta}
           </div>
         </motion.div>
         
@@ -114,8 +122,8 @@ const HeroVisualLite = () => {
           transition={{ delay: 0.15, duration: 0.6 }}
           className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-[1.1]"
         >
-          Transformamos tus
-          <span className="block text-secondary">ideas en impacto visual</span>
+          {titulo}
+          <span className="block text-secondary">{subtitulo}</span>
         </motion.h1>
         
         <motion.p
@@ -124,8 +132,7 @@ const HeroVisualLite = () => {
           transition={{ delay: 0.3, duration: 0.6 }}
           className="text-blue-100/80 text-base md:text-lg lg:text-xl max-w-2xl mx-auto mt-6"
         >
-          Soluciones integrales en artes gráficas: cartelería, señalética, 
-          impresión y diseño. Calidad y garantía en cada proyecto.
+          {descripcion}
         </motion.p>
         
         <motion.div
@@ -135,15 +142,14 @@ const HeroVisualLite = () => {
           className="flex flex-wrap justify-center gap-4 mt-8"
         >
           <Link
-            to="/servicios"
+            to={boton_link}
             className="bg-secondary text-primary px-10 py-4 rounded-full font-bold text-base md:text-lg shadow-2xl shadow-secondary/30 hover:shadow-secondary/50 transition-all hover:scale-105 inline-flex items-center gap-3"
           >
-            <span>Ver Servicios</span>
+            <span>{boton_texto}</span>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </Link>
-          {/* ===== BOTÓN "CONTÁCTANOS" ELIMINADO ===== */}
         </motion.div>
 
         <motion.div

@@ -11,8 +11,7 @@ const Home = () => {
     servicios, 
     testimonios, 
     configuracion,
-    serviciosDestacados,
-    loadFromSupabase
+    serviciosDestacados
   } = useAppContext();
 
   const [ref, inView] = useInView({
@@ -54,6 +53,7 @@ const Home = () => {
 
   return (
     <div className="overflow-hidden">
+      {/* 👇 Hero ahora usa los datos del contexto */}
       <HeroVisualLite />
 
       <section className="py-20 bg-white" ref={ref}>
