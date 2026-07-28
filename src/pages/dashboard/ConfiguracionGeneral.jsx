@@ -1,17 +1,18 @@
+// src/pages/dashboard/ConfiguracionGeneral.jsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
 
 const ConfiguracionGeneral = () => {
-  const { configuracion, updateConfiguracion } = useAppContext();
+  const { configuracion, actualizarConfiguracion } = useAppContext();
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = {
-      nombreEmpresa: formData.get('nombreEmpresa'),
+      nombre_empresa: formData.get('nombre_empresa'),
       slogan: formData.get('slogan'),
       telefono1: formData.get('telefono1'),
       telefono2: formData.get('telefono2'),
@@ -19,12 +20,15 @@ const ConfiguracionGeneral = () => {
       direccion: formData.get('direccion'),
       email: formData.get('email'),
       horario: formData.get('horario'),
-      adminEmail: formData.get('adminEmail'),
-      adminPassword: formData.get('adminPassword')
+      admin_email: formData.get('admin_email'),
+      admin_password: formData.get('admin_password')
     };
-    updateConfiguracion(data);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
+    
+    const result = await actualizarConfiguracion(data);
+    if (result.success) {
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    }
   };
 
   return (
@@ -49,8 +53,8 @@ const ConfiguracionGeneral = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de la Empresa</label>
               <input
                 type="text"
-                name="nombreEmpresa"
-                defaultValue={configuracion.nombreEmpresa}
+                name="nombre_empresa"
+                defaultValue={configuracion.nombre_empresa}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
               />
             </div>
@@ -126,8 +130,8 @@ const ConfiguracionGeneral = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Email Admin</label>
               <input
                 type="email"
-                name="adminEmail"
-                defaultValue={configuracion.adminEmail}
+                name="admin_email"
+                defaultValue={configuracion.admin_email}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
               />
             </div>
@@ -136,8 +140,8 @@ const ConfiguracionGeneral = () => {
               <div className="flex gap-2">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  name="adminPassword"
-                  defaultValue={configuracion.adminPassword}
+                  name="admin_password"
+                  defaultValue={configuracion.admin_password}
                   className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
                 />
                 <button

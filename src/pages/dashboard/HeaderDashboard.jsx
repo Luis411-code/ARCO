@@ -29,7 +29,7 @@ const HeaderDashboard = ({
       </div>
 
       <div className="flex items-center gap-3 flex-wrap">
-        {/* ===== BOTONES DE SINCRONIZACIÓN ===== */}
+        {/* BOTONES DE SINCRONIZACIÓN */}
         <button
           onClick={onSyncToCloud}
           disabled={syncing}
@@ -54,7 +54,7 @@ const HeaderDashboard = ({
           {syncing ? '⏳' : '📥'} {syncing ? 'Cargando...' : 'Cargar desde Nube'}
         </button>
 
-        {/* ===== BOTÓN DE ACTUALIZACIÓN ===== */}
+        {/* BOTÓN DE ACTUALIZACIÓN */}
         <button
           onClick={onRefresh}
           disabled={refreshing}
@@ -73,7 +73,6 @@ const HeaderDashboard = ({
           )}
         </button>
 
-        {/* Fecha */}
         <span className="text-sm text-gray-500 hidden sm:block">
           {new Date().toLocaleDateString('es-ES', { 
             weekday: 'long', 
@@ -83,7 +82,6 @@ const HeaderDashboard = ({
           })}
         </span>
 
-        {/* Perfil */}
         <div className="relative">
           <button
             onClick={() => setShowDropdown(!showDropdown)}

@@ -1,10 +1,11 @@
+// src/components/TestimonioForm.jsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 
 const TestimonioForm = () => {
-  const { addTestimonioPendiente } = useAppContext();
+  const { guardarTestimonioPendiente } = useAppContext();
   const navigate = useNavigate();
   const [enviado, setEnviado] = useState(false);
   const [cargando, setCargando] = useState(false);
@@ -22,14 +23,13 @@ const TestimonioForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setCargando(true);
 
-    // Generar foto con UI Avatars
     const foto = `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.nombre)}&background=0a3d6b&color=fff&size=100`;
 
-    addTestimonioPendiente({
+    const result = await guardarTestimonioPendiente({
       nombre: formData.nombre,
       empresa: formData.empresa || 'Cliente',
       reseña: formData.reseña,
@@ -38,12 +38,13 @@ const TestimonioForm = () => {
     });
 
     setCargando(false);
-    setEnviado(true);
-    setFormData({ nombre: '', empresa: '', reseña: '', calificacion: 5 });
-
-    setTimeout(() => {
-      navigate('/');
-    }, 3000);
+    if (result.success) {
+      setEnviado(true);
+      setFormData({ nombre: '', empresa: '', reseña: '', calificacion: 5 });
+      setTimeout(() => {
+        navigate('/');
+      }, 3000);
+    }
   };
 
   return (

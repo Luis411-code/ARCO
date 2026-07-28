@@ -1,16 +1,22 @@
+// src/pages/dashboard/MensajesManager.jsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
 
 const MensajesManager = () => {
-  const { mensajes, marcarLeido, marcarRespondido, deleteMensaje } = useAppContext();
+  const { 
+    mensajes, 
+    marcarMensajeLeido, 
+    marcarMensajeRespondido,
+    eliminarMensajeConSupabase 
+  } = useAppContext();
+
   const [filter, setFilter] = useState('todos');
   const [showModal, setShowModal] = useState(false);
   const [mensajeSeleccionado, setMensajeSeleccionado] = useState(null);
-  const [tipoRespuesta, setTipoRespuesta] = useState('email'); // 'email' o 'whatsapp'
+  const [tipoRespuesta, setTipoRespuesta] = useState('email');
   const [respuesta, setRespuesta] = useState('');
 
-  // ===== FUNCIÓN PARA FORMATEAR FECHA =====
   const formatearFecha = (fechaISO) => {
     const fecha = new Date(fechaISO);
     const ahora = new Date();
@@ -29,18 +35,15 @@ const MensajesManager = () => {
     });
   };
 
-  // ===== FILTRAR MENSAJES =====
   const mensajesFiltrados = mensajes.filter(m => {
     if (filter === 'no-leidos') return !m.leido;
     if (filter === 'respondidos') return m.respondido;
     return true;
   });
 
-  // ===== CONTADORES =====
   const totalNoLeidos = mensajes.filter(m => !m.leido).length;
   const totalRespondidos = mensajes.filter(m => m.respondido).length;
 
-  // ===== ABRIR MODAL DE RESPUESTA =====
   const abrirModalRespuesta = (mensaje, tipo) => {
     setMensajeSeleccionado(mensaje);
     setTipoRespuesta(tipo);
@@ -48,7 +51,6 @@ const MensajesManager = () => {
     setShowModal(true);
   };
 
-  // ===== ENVIAR RESPUESTA =====
   const enviarRespuesta = () => {
     if (!respuesta.trim()) {
       alert('Por favor, escribe una respuesta antes de enviar.');
@@ -58,14 +60,12 @@ const MensajesManager = () => {
     const mensaje = mensajeSeleccionado;
 
     if (tipoRespuesta === 'email') {
-      // Abrir email con la respuesta del admin
       const asunto = encodeURIComponent(`ARCO - Respuesta a tu mensaje`);
       const cuerpo = encodeURIComponent(
         `Hola ${mensaje.nombre},\n\n${respuesta}\n\n---\nTu mensaje original:\n"${mensaje.mensaje}"\n\nSaludos cordiales,\nARCO - Publicidad y Comunicación Gráfica`
       );
       window.open(`mailto:${mensaje.email}?subject=${asunto}&body=${cuerpo}`, '_blank');
     } else {
-      // Abrir WhatsApp con la respuesta del admin
       const telefonoLimpio = mensaje.telefono.replace(/[^0-9]/g, '');
       const mensajeWhatsApp = encodeURIComponent(
         `Hola ${mensaje.nombre}, soy de ARCO.\n\n${respuesta}`
@@ -73,8 +73,7 @@ const MensajesManager = () => {
       window.open(`https://wa.me/${telefonoLimpio}?text=${mensajeWhatsApp}`, '_blank');
     }
 
-    // Marcar como respondido
-    marcarRespondido(mensaje.id);
+    marcarMensajeRespondido(mensaje.id);
     setShowModal(false);
     setMensajeSeleccionado(null);
     setRespuesta('');
@@ -148,7 +147,6 @@ const MensajesManager = () => {
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
-                {/* Info del cliente */}
                 <div className="flex-1 min-w-[200px]">
                   <div className="flex items-center gap-3 mb-2">
                     <h4 className="font-bold text-primary text-lg">{mensaje.nombre}</h4>
@@ -170,12 +168,10 @@ const MensajesManager = () => {
                   </div>
                 </div>
 
-                {/* Botones de acción */}
                 <div className="flex gap-2 flex-wrap">
                   <button
                     onClick={() => abrirModalRespuesta(mensaje, 'email')}
                     className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
-                    title="Responder por Email"
                   >
                     📧 Responder Email
                   </button>
@@ -184,31 +180,27 @@ const MensajesManager = () => {
                     <button
                       onClick={() => abrirModalRespuesta(mensaje, 'whatsapp')}
                       className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
-                      title="Responder por WhatsApp"
                     >
                       💬 WhatsApp
                     </button>
                   )}
                   
                   <button
-                    onClick={() => marcarLeido(mensaje.id)}
+                    onClick={() => marcarMensajeLeido(mensaje.id)}
                     className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm font-semibold transition-all"
-                    title="Marcar como leído"
                   >
                     👁️
                   </button>
                   
                   <button
-                    onClick={() => deleteMensaje(mensaje.id)}
+                    onClick={() => eliminarMensajeConSupabase(mensaje.id)}
                     className="flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-600 px-3 py-2 rounded-lg text-sm font-semibold transition-all"
-                    title="Eliminar"
                   >
                     🗑️
                   </button>
                 </div>
               </div>
 
-              {/* Mensaje */}
               <div className="mt-3 p-4 bg-gray-50 rounded-lg border border-gray-100">
                 <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
                   {mensaje.mensaje}
@@ -225,7 +217,6 @@ const MensajesManager = () => {
         </div>
       )}
 
-      {/* ===== MODAL PARA ESCRIBIR RESPUESTA ===== */}
       {showModal && mensajeSeleccionado && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <motion.div
@@ -241,13 +232,11 @@ const MensajesManager = () => {
             </p>
 
             <div className="space-y-4">
-              {/* Mensaje original */}
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <p className="text-xs text-gray-400 mb-1">Mensaje original:</p>
                 <p className="text-sm text-gray-700">{mensajeSeleccionado.mensaje}</p>
               </div>
 
-              {/* Campo para escribir la respuesta */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Tu respuesta *

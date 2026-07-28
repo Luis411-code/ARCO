@@ -1,9 +1,10 @@
+// src/pages/dashboard/ServiciosDestacadosManager.jsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
 
 const ServiciosDestacadosManager = () => {
-  const { serviciosDestacados, updateServiciosDestacados } = useAppContext();
+  const { serviciosDestacados, actualizarServiciosDestacados } = useAppContext();
   const [success, setSuccess] = useState(false);
   const [items, setItems] = useState(serviciosDestacados);
 
@@ -13,11 +14,13 @@ const ServiciosDestacadosManager = () => {
     setItems(newItems);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    updateServiciosDestacados(items);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
+    const result = await actualizarServiciosDestacados(items);
+    if (result.success) {
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    }
   };
 
   return (
@@ -37,7 +40,7 @@ const ServiciosDestacadosManager = () => {
       <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
         <form onSubmit={handleSubmit} className="space-y-6">
           {items.map((item, index) => (
-            <div key={item.id} className="p-4 border border-gray-200 rounded-lg">
+            <div key={item.id || index} className="p-4 border border-gray-200 rounded-lg">
               <h4 className="font-semibold text-primary mb-3">Servicio Destacado #{index + 1}</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
@@ -65,6 +68,15 @@ const ServiciosDestacadosManager = () => {
                   value={item.descripcion}
                   onChange={(e) => handleChange(index, 'descripcion', e.target.value)}
                   rows="2"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
+                <input
+                  type="text"
+                  value={item.link}
+                  onChange={(e) => handleChange(index, 'link', e.target.value)}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
                 />
               </div>

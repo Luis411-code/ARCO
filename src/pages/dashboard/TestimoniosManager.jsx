@@ -1,3 +1,4 @@
+// src/pages/dashboard/TestimoniosManager.jsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
@@ -5,10 +6,10 @@ import { useAppContext } from '../../context/AppContext';
 const TestimoniosManager = () => {
   const { 
     testimonios, 
-    deleteTestimonio,
     testimoniosPendientes,
-    aprobarTestimonio,
-    rechazarTestimonio
+    aprobarTestimonioConSupabase,
+    rechazarTestimonioConSupabase,
+    eliminarTestimonioConSupabase
   } = useAppContext();
 
   const [activeTab, setActiveTab] = useState('pendientes');
@@ -30,7 +31,6 @@ const TestimoniosManager = () => {
         <h2 className="text-2xl font-bold text-primary">💬 Gestión de Testimonios</h2>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setActiveTab('pendientes')}
@@ -95,13 +95,13 @@ const TestimoniosManager = () => {
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => aprobarTestimonio(testimonio.id)}
+                        onClick={() => aprobarTestimonioConSupabase(testimonio.id)}
                         className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
                       >
                         ✅ Aprobar
                       </button>
                       <button
-                        onClick={() => rechazarTestimonio(testimonio.id)}
+                        onClick={() => rechazarTestimonioConSupabase(testimonio.id)}
                         className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
                       >
                         ❌ Rechazar
@@ -149,7 +149,7 @@ const TestimoniosManager = () => {
                   <p className="text-gray-700 text-sm">"{testimonio.reseña}"</p>
                   <div className="flex justify-end mt-4">
                     <button
-                      onClick={() => deleteTestimonio(testimonio.id)}
+                      onClick={() => eliminarTestimonioConSupabase(testimonio.id)}
                       className="text-red-500 hover:text-red-700 text-sm font-semibold transition-colors"
                     >
                       🗑️ Eliminar

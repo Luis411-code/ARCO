@@ -19,9 +19,8 @@ const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
   const [syncing, setSyncing] = useState(false);
-
+  
   const { 
     setServicios,
     setTestimonios,
@@ -31,8 +30,9 @@ const Dashboard = () => {
     setHero,
     setSobreNosotros,
     setServiciosDestacados,
-    syncToMongoDB,
-    loadFromMongoDB
+    syncToSupabase,
+    loadFromSupabase,
+    cargando
   } = useAppContext();
 
   useEffect(() => {
@@ -48,42 +48,32 @@ const Dashboard = () => {
   };
 
   const handleRefresh = () => {
-    setRefreshing(true);
+    const savedServicios = localStorage.getItem('arco_servicios');
+    const savedTestimonios = localStorage.getItem('arco_testimonios');
+    const savedTestimoniosPendientes = localStorage.getItem('arco_testimonios_pendientes');
+    const savedMensajes = localStorage.getItem('arco_mensajes');
+    const savedConfiguracion = localStorage.getItem('arco_configuracion');
+    const savedHero = localStorage.getItem('arco_hero');
+    const savedSobreNosotros = localStorage.getItem('arco_sobre_nosotros');
+    const savedServiciosDestacados = localStorage.getItem('arco_servicios_destacados');
 
-    try {
-      const savedServicios = localStorage.getItem('arco_servicios');
-      const savedTestimonios = localStorage.getItem('arco_testimonios');
-      const savedTestimoniosPendientes = localStorage.getItem('arco_testimonios_pendientes');
-      const savedMensajes = localStorage.getItem('arco_mensajes');
-      const savedConfiguracion = localStorage.getItem('arco_configuracion');
-      const savedHero = localStorage.getItem('arco_hero');
-      const savedSobreNosotros = localStorage.getItem('arco_sobre_nosotros');
-      const savedServiciosDestacados = localStorage.getItem('arco_servicios_destacados');
+    if (savedServicios) setServicios(JSON.parse(savedServicios));
+    if (savedTestimonios) setTestimonios(JSON.parse(savedTestimonios));
+    if (savedTestimoniosPendientes) setTestimoniosPendientes(JSON.parse(savedTestimoniosPendientes));
+    if (savedMensajes) setMensajes(JSON.parse(savedMensajes));
+    if (savedConfiguracion) setConfiguracion(JSON.parse(savedConfiguracion));
+    if (savedHero) setHero(JSON.parse(savedHero));
+    if (savedSobreNosotros) setSobreNosotros(JSON.parse(savedSobreNosotros));
+    if (savedServiciosDestacados) setServiciosDestacados(JSON.parse(savedServiciosDestacados));
 
-      if (savedServicios) setServicios(JSON.parse(savedServicios));
-      if (savedTestimonios) setTestimonios(JSON.parse(savedTestimonios));
-      if (savedTestimoniosPendientes) setTestimoniosPendientes(JSON.parse(savedTestimoniosPendientes));
-      if (savedMensajes) setMensajes(JSON.parse(savedMensajes));
-      if (savedConfiguracion) setConfiguracion(JSON.parse(savedConfiguracion));
-      if (savedHero) setHero(JSON.parse(savedHero));
-      if (savedSobreNosotros) setSobreNosotros(JSON.parse(savedSobreNosotros));
-      if (savedServiciosDestacados) setServiciosDestacados(JSON.parse(savedServiciosDestacados));
-
-      setRefreshKey(prev => prev + 1);
-    } catch (error) {
-      console.error('Error al recargar datos:', error);
-    }
-
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 600);
+    setRefreshKey(prev => prev + 1);
   };
 
   const handleSyncToCloud = async () => {
     setSyncing(true);
-    const result = await syncToMongoDB();
+    const result = await syncToSupabase();
     if (result.success) {
-      alert('✅ Datos sincronizados con MongoDB correctamente');
+      alert('✅ Datos sincronizados con Supabase correctamente');
     } else {
       alert('❌ Error al sincronizar: ' + result.error);
     }
@@ -92,9 +82,9 @@ const Dashboard = () => {
 
   const handleLoadFromCloud = async () => {
     setSyncing(true);
-    const result = await loadFromMongoDB();
+    const result = await loadFromSupabase();
     if (result.success) {
-      alert('✅ Datos cargados desde MongoDB correctamente');
+      alert('✅ Datos cargados desde Supabase correctamente');
       setRefreshKey(prev => prev + 1);
     } else {
       alert('❌ Error al cargar: ' + result.error);
@@ -141,7 +131,7 @@ const Dashboard = () => {
           isSidebarOpen={isSidebarOpen}
           onLogout={handleLogout}
           onRefresh={handleRefresh}
-          refreshing={refreshing}
+          refreshing={cargando}
           onSyncToCloud={handleSyncToCloud}
           onLoadFromCloud={handleLoadFromCloud}
           syncing={syncing}

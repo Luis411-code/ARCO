@@ -1,9 +1,10 @@
+// src/pages/dashboard/HeroManager.jsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
 
 const HeroManager = () => {
-  const { hero, updateHero } = useAppContext();
+  const { hero, actualizarHero } = useAppContext();
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState(hero);
 
@@ -14,11 +15,13 @@ const HeroManager = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    updateHero(formData);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
+    const result = await actualizarHero(formData);
+    if (result.success) {
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    }
   };
 
   return (
@@ -84,8 +87,8 @@ const HeroManager = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Texto del botón</label>
               <input
                 type="text"
-                name="botonTexto"
-                value={formData.botonTexto}
+                name="boton_texto"
+                value={formData.boton_texto}
                 onChange={handleChange}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
               />
@@ -94,8 +97,8 @@ const HeroManager = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Link del botón</label>
               <input
                 type="text"
-                name="botonLink"
-                value={formData.botonLink}
+                name="boton_link"
+                value={formData.boton_link}
                 onChange={handleChange}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
               />
@@ -115,7 +118,7 @@ const HeroManager = () => {
             <div className="text-xs text-secondary font-semibold">{formData.etiqueta}</div>
             <div className="text-lg font-bold text-primary">{formData.titulo} <span className="text-secondary">{formData.subtitulo}</span></div>
             <div className="text-sm text-gray-600">{formData.descripcion}</div>
-            <div className="mt-2 inline-block bg-secondary text-primary px-4 py-1 rounded-full text-xs font-bold">{formData.botonTexto}</div>
+            <div className="mt-2 inline-block bg-secondary text-primary px-4 py-1 rounded-full text-xs font-bold">{formData.boton_texto}</div>
           </div>
         </div>
       </div>

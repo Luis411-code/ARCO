@@ -1,13 +1,13 @@
+// src/pages/dashboard/Statistics.jsx
 import { motion } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
 
 const Statistics = () => {
-  const { servicios, testimonios } = useAppContext();
+  const { servicios, testimonios, mensajes } = useAppContext();
 
-  // ===== CONTADORES REALES =====
   const totalServicios = servicios.length;
   const totalTestimonios = testimonios.length;
-  const totalMensajes = 12; // Simulado (después se conecta con WhatsApp)
+  const totalMensajes = mensajes.length;
 
   const cards = [
     { 
@@ -32,7 +32,7 @@ const Statistics = () => {
       value: totalMensajes, 
       icon: '✉️', 
       color: 'from-orange-500 to-orange-700',
-      description: 'Mensajes recibidos vía WhatsApp'
+      description: 'Mensajes recibidos'
     }
   ];
 
@@ -63,7 +63,6 @@ const Statistics = () => {
         ))}
       </div>
 
-      {/* Acciones rápidas */}
       <div className="mt-8">
         <h3 className="text-lg font-semibold text-primary mb-4">⚡ Acciones Rápidas</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -80,8 +79,8 @@ const Statistics = () => {
             className="bg-secondary/10 hover:bg-secondary/20 text-secondary p-4 rounded-xl text-left transition-all"
           >
             <span className="text-2xl block">💬</span>
-            <span className="font-semibold">Agregar testimonio</span>
-            <p className="text-sm text-gray-500">Añade una opinión de cliente</p>
+            <span className="font-semibold">Revisar testimonio</span>
+            <p className="text-sm text-gray-500">Comprueba las opiniones de nuestros clientes</p>
           </button>
         </div>
       </div>

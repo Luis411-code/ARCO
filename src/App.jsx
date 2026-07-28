@@ -1,6 +1,5 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, lazy, Suspense, useEffect } from 'react';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import Home from './components/Home';
@@ -36,21 +35,18 @@ const AdminLayout = ({ children }) => (
 );
 
 function AppContent() {
-  const { loadFromMongoDB, setServicios, setConfiguracion } = useAppContext();
+  const { loadFromSupabase, setServicios } = useAppContext();
 
-  // ===== CARGAR DATOS DESDE MONGODB AL INICIAR LA APP =====
+  // ===== CARGAR DATOS DESDE SUPABASE AL INICIAR =====
   useEffect(() => {
     const cargarDatos = async () => {
-      console.log('📥 Cargando datos desde MongoDB...');
-      const result = await loadFromMongoDB();
+      console.log('📥 Cargando datos desde Supabase...');
+      const result = await loadFromSupabase();
       
-      if (result.success && result.results) {
-        console.log('✅ Datos cargados desde MongoDB:', result.results);
-        if (result.results.servicios && result.results.servicios.length > 0) {
-          setServicios(result.results.servicios);
-        }
+      if (result.success) {
+        console.log('✅ Datos cargados desde Supabase');
       } else {
-        console.warn('⚠️ No se pudieron cargar datos desde MongoDB, usando localStorage');
+        console.warn('⚠️ No se pudieron cargar datos desde Supabase, usando localStorage');
         const savedServicios = localStorage.getItem('arco_servicios');
         if (savedServicios) {
           setServicios(JSON.parse(savedServicios));

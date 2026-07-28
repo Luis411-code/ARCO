@@ -2,10 +2,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
-import { apiService } from '../../services/apiService';
+import { uploadImage } from '../../services/supabaseService';
 
 const ServiciosManager = () => {
-  const { servicios, addServicio, deleteServicio, updateServicio } = useAppContext();
+  const { servicios, agregarServicio, actualizarServicio, eliminarServicio } = useAppContext();
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [imagenesPreview, setImagenesPreview] = useState([]);
@@ -13,27 +13,27 @@ const ServiciosManager = () => {
   const [mensaje, setMensaje] = useState('');
   const [formData, setFormData] = useState({
     titulo: '',
-    desc: '',
+    descripcion: '',
     icono: '📋',
     precio: '',
     categoria: 'Cartelería',
     imagenes: [],
-    camposFormulario: []
+    campos_formulario: []
   });
 
-  // ===== SUBIR IMAGEN A CLOUDINARY =====
-  const subirImagen = async (base64Image) => {
+  // ===== SUBIR IMAGEN A SUPABASE =====
+  const subirImagen = async (file) => {
     try {
       setSubiendo(true);
       setMensaje('📤 Subiendo imagen...');
       
-      const result = await apiService.uploadImage(base64Image, 'arco/servicios');
+      const result = await uploadImage(file, 'servicios');
       
-      if (result.success) {
+      if (result.url) {
         setMensaje('✅ Imagen subida correctamente');
         return result.url;
       } else {
-        setMensaje('❌ Error al subir imagen: ' + result.error);
+        setMensaje('❌ Error al subir imagen');
         return null;
       }
     } catch (error) {
@@ -64,9 +64,7 @@ const ServiciosManager = () => {
     const nuevasImagenes = [];
 
     for (const file of files) {
-      const base64 = await convertirABase64(file);
-      const url = await subirImagen(base64);
-      
+      const url = await subirImagen(file);
       if (url) {
         nuevasImagenes.push(url);
       }
@@ -100,45 +98,48 @@ const ServiciosManager = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const camposValidos = formData.camposFormulario.every(c => c.id && c.label);
+    const camposValidos = formData.campos_formulario.every(c => c.id && c.label);
     if (!camposValidos) {
       setMensaje('⚠️ Todos los campos deben tener ID y etiqueta');
       return;
     }
 
-    // Asegurar que las imágenes son URLs (no Base64)
     const servicioData = {
       ...formData,
       imagenes: formData.imagenes.filter(img => img.startsWith('http'))
     };
 
+    let result;
     if (editingId) {
-      updateServicio(editingId, servicioData);
-      setMensaje('✅ Servicio actualizado correctamente');
+      result = await actualizarServicio(editingId, servicioData);
     } else {
-      addServicio(servicioData);
-      setMensaje('✅ Servicio agregado correctamente');
+      result = await agregarServicio(servicioData);
     }
 
-    setTimeout(() => {
-      setShowModal(false);
-      setEditingId(null);
-      setFormData({ titulo: '', desc: '', icono: '📋', precio: '', categoria: 'Cartelería', imagenes: [], camposFormulario: [] });
-      setImagenesPreview([]);
-      setMensaje('');
-    }, 1500);
+    if (result.success) {
+      setMensaje(editingId ? '✅ Servicio actualizado correctamente' : '✅ Servicio agregado correctamente');
+      setTimeout(() => {
+        setShowModal(false);
+        setEditingId(null);
+        setFormData({ titulo: '', descripcion: '', icono: '📋', precio: '', categoria: 'Cartelería', imagenes: [], campos_formulario: [] });
+        setImagenesPreview([]);
+        setMensaje('');
+      }, 1500);
+    } else {
+      setMensaje('❌ Error al guardar: ' + result.error);
+    }
   };
 
   const handleEdit = (servicio) => {
     setEditingId(servicio.id);
     setFormData({
       titulo: servicio.titulo || '',
-      desc: servicio.desc || '',
+      descripcion: servicio.descripcion || '',
       icono: servicio.icono || '📋',
       precio: servicio.precio || '',
       categoria: servicio.categoria || 'Cartelería',
       imagenes: servicio.imagenes || [],
-      camposFormulario: servicio.camposFormulario || []
+      campos_formulario: servicio.campos_formulario || []
     });
     
     if (servicio.imagenes && servicio.imagenes.length > 0) {
@@ -148,6 +149,17 @@ const ServiciosManager = () => {
     }
     setShowModal(true);
     setMensaje('');
+  };
+
+  const handleDelete = async (id) => {
+    if (confirm('¿Estás seguro de eliminar este servicio?')) {
+      const result = await eliminarServicio(id);
+      if (result.success) {
+        setMensaje('✅ Servicio eliminado');
+      } else {
+        setMensaje('❌ Error al eliminar: ' + result.error);
+      }
+    }
   };
 
   // ===== CAMPOS DEL FORMULARIO =====
@@ -162,7 +174,6 @@ const ServiciosManager = () => {
   });
   const [opcionesInput, setOpcionesInput] = useState('');
 
-  // ===== EDITAR CAMPO =====
   const [editandoCampoIndex, setEditandoCampoIndex] = useState(null);
   const [campoEditando, setCampoEditando] = useState(null);
   const [showEditFieldModal, setShowEditFieldModal] = useState(false);
@@ -173,7 +184,7 @@ const ServiciosManager = () => {
       return;
     }
 
-    if (formData.camposFormulario.some(c => c.id === nuevoCampo.id)) {
+    if (formData.campos_formulario.some(c => c.id === nuevoCampo.id)) {
       setMensaje('⚠️ Ya existe un campo con ese ID');
       return;
     }
@@ -185,7 +196,7 @@ const ServiciosManager = () => {
 
     setFormData({
       ...formData,
-      camposFormulario: [...formData.camposFormulario, campo]
+      campos_formulario: [...formData.campos_formulario, campo]
     });
 
     setNuevoCampo({ id: '', label: '', tipo: 'text', placeholder: '', required: true, opciones: [] });
@@ -196,15 +207,15 @@ const ServiciosManager = () => {
 
   const eliminarCampo = (index) => {
     if (confirm('¿Eliminar este campo?')) {
-      const nuevosCampos = formData.camposFormulario.filter((_, i) => i !== index);
-      setFormData({ ...formData, camposFormulario: nuevosCampos });
+      const nuevosCampos = formData.campos_formulario.filter((_, i) => i !== index);
+      setFormData({ ...formData, campos_formulario: nuevosCampos });
       setMensaje('✅ Campo eliminado');
       setTimeout(() => setMensaje(''), 1500);
     }
   };
 
   const abrirEditarCampo = (index) => {
-    const campo = formData.camposFormulario[index];
+    const campo = formData.campos_formulario[index];
     setEditandoCampoIndex(index);
     setCampoEditando({ ...campo });
     setShowEditFieldModal(true);
@@ -216,7 +227,7 @@ const ServiciosManager = () => {
       return;
     }
 
-    const duplicado = formData.camposFormulario.some(
+    const duplicado = formData.campos_formulario.some(
       (c, idx) => c.id === campoEditando.id && idx !== editandoCampoIndex
     );
     if (duplicado) {
@@ -224,9 +235,9 @@ const ServiciosManager = () => {
       return;
     }
 
-    const nuevosCampos = [...formData.camposFormulario];
+    const nuevosCampos = [...formData.campos_formulario];
     nuevosCampos[editandoCampoIndex] = { ...campoEditando };
-    setFormData({ ...formData, camposFormulario: nuevosCampos });
+    setFormData({ ...formData, campos_formulario: nuevosCampos });
     setShowEditFieldModal(false);
     setEditandoCampoIndex(null);
     setCampoEditando(null);
@@ -262,7 +273,7 @@ const ServiciosManager = () => {
         <button
           onClick={() => {
             setEditingId(null);
-            setFormData({ titulo: '', desc: '', icono: '📋', precio: '', categoria: 'Cartelería', imagenes: [], camposFormulario: [] });
+            setFormData({ titulo: '', descripcion: '', icono: '📋', precio: '', categoria: 'Cartelería', imagenes: [], campos_formulario: [] });
             setImagenesPreview([]);
             setMensaje('');
             setShowModal(true);
@@ -272,6 +283,71 @@ const ServiciosManager = () => {
           + Agregar Servicio
         </button>
       </div>
+
+      {/* LISTA DE SERVICIOS */}
+      {servicios.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-md p-8 text-center">
+          <p className="text-gray-500">No hay servicios agregados todavía.</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Icono</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campos</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {servicios.map((servicio, index) => (
+                  <motion.tr
+                    key={servicio.id || index}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 text-sm text-gray-500">{index + 1}</td>
+                    <td className="px-6 py-4 text-2xl">{servicio.icono || '📋'}</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">{servicio.titulo}</td>
+                    <td className="px-6 py-4 text-gray-600">{servicio.categoria}</td>
+                    <td className="px-6 py-4 text-gray-600">{servicio.precio}</td>
+                    <td className="px-6 py-4">
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                        {servicio.campos_formulario?.length || 0} campos
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(servicio)}
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDelete(servicio.id)}
+                          className="text-red-600 hover:text-red-800 transition-colors"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-6 py-3 bg-gray-50 text-sm text-gray-500">
+            Total: {servicios.length} servicios
+          </div>
+        </div>
+      )}
 
       {/* ===== MODAL PRINCIPAL ===== */}
       {showModal && (
@@ -300,7 +376,6 @@ const ServiciosManager = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* DATOS BÁSICOS */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
@@ -328,8 +403,8 @@ const ServiciosManager = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Descripción *</label>
                 <textarea
-                  name="desc"
-                  value={formData.desc}
+                  name="descripcion"
+                  value={formData.descripcion}
                   onChange={handleInputChange}
                   required
                   rows="3"
@@ -369,7 +444,6 @@ const ServiciosManager = () => {
                 </div>
               </div>
 
-              {/* IMÁGENES - SUBIDA A CLOUDINARY */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Imágenes</label>
                 <input
@@ -412,7 +486,6 @@ const ServiciosManager = () => {
                 </div>
               )}
 
-              {/* ===== CAMPOS DEL FORMULARIO ===== */}
               <div className="border-t border-gray-200 pt-4">
                 <button
                   type="button"
@@ -428,10 +501,10 @@ const ServiciosManager = () => {
                       Personaliza los campos que se mostrarán cuando el cliente solicite este servicio.
                     </p>
 
-                    {formData.camposFormulario.length > 0 && (
+                    {formData.campos_formulario.length > 0 && (
                       <div className="space-y-2">
                         <h4 className="text-sm font-semibold text-gray-700">Campos actuales:</h4>
-                        {formData.camposFormulario.map((campo, idx) => (
+                        {formData.campos_formulario.map((campo, idx) => (
                           <div key={idx} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="font-medium text-gray-800">{campo.label}</span>
@@ -550,7 +623,6 @@ const ServiciosManager = () => {
                 )}
               </div>
 
-              {/* BOTONES */}
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"

@@ -1,9 +1,10 @@
+// src/pages/dashboard/SobreNosotrosManager.jsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
 
 const SobreNosotrosManager = () => {
-  const { sobreNosotros, updateSobreNosotros } = useAppContext();
+  const { sobreNosotros, actualizarSobreNosotros } = useAppContext();
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState(sobreNosotros);
 
@@ -20,11 +21,13 @@ const SobreNosotrosManager = () => {
     setFormData({ ...formData, valores: newValores });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    updateSobreNosotros(formData);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
+    const result = await actualizarSobreNosotros(formData);
+    if (result.success) {
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    }
   };
 
   return (

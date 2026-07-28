@@ -33,7 +33,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
               transition={{ duration: 0.3 }}
               className="text-white font-bold text-xl"
             >
-              Admin
+              ARCO Admin
             </motion.span>
           )}
         </Link>

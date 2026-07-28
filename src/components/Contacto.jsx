@@ -1,8 +1,10 @@
 // src/components/Contacto.jsx
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { useAppContext } from '../context/AppContext';
 
 const Contacto = () => {
+  const { guardarMensaje } = useAppContext();
   const [enviado, setEnviado] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
@@ -20,27 +22,14 @@ const Contacto = () => {
       mensaje: formData.get('mensaje')
     };
 
-    try {
-      const response = await fetch('/api/contacto', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(datos)
-      });
-
-      const resultado = await response.json();
-      
-      if (resultado.success) {
-        setEnviado(true);
-        e.target.reset();
-        setTimeout(() => setEnviado(false), 5000);
-      } else {
-        setError(resultado.error || 'Error al enviar el mensaje');
-      }
-    } catch (err) {
-      console.error('Error de conexión:', err);
-      setError('Error de conexión. Intenta de nuevo.');
+    const result = await guardarMensaje(datos);
+    
+    if (result.success) {
+      setEnviado(true);
+      e.target.reset();
+      setTimeout(() => setEnviado(false), 5000);
+    } else {
+      setError(result.error || 'Error al enviar el mensaje');
     }
     
     setCargando(false);
