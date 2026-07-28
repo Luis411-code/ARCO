@@ -24,7 +24,7 @@ export const TABLAS = {
 };
 
 export const BUCKETS = {
-  IMAGENES: 'arco-imagenes' // 👈 Debe existir en Supabase Storage
+  IMAGENES: 'arco-imagenes'
 };
 
 export function getPublicUrl(bucket, path) {
