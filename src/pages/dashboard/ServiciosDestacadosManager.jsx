@@ -47,19 +47,17 @@ const ServiciosDestacadosManager = () => {
     }
 
     const newItem = {
-      servicioId: servicio.id,
+      servicioId: servicio.id,     // 👈 Para el frontend
+      servicio_id: servicio.id,    // 👈 Para la base de datos
       titulo: servicio.titulo,
-      descripcion: servicio.descripcion || '',
-      // No guardamos icono ni link
+      descripcion: servicio.descripcion || ''
     };
 
     if (editIndex !== null) {
-      // Editar
       const newItems = [...items];
       newItems[editIndex] = newItem;
       setItems(newItems);
     } else {
-      // Agregar nuevo
       setItems([...items, newItem]);
     }
 

@@ -153,13 +153,14 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {destacados.length > 0 ? (
               destacados.map((item, index) => {
-                // Buscar el servicio completo por ID
-                const servicio = servicios.find(s => s.id === item.servicioId);
+                // Buscar el servicio completo por ID (usar servicio_id o servicioId)
+                const servicioId = item.servicio_id || item.servicioId;
+                const servicio = servicios.find(s => s.id === servicioId);
                 if (!servicio) return null;
                 
                 return (
                   <motion.div
-                    key={item.servicioId || index}
+                    key={servicioId || index}
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}

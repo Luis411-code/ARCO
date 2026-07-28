@@ -165,26 +165,43 @@ export async function deleteServicio(id) {
 // ============================================================
 // SERVICIOS DESTACADOS
 // ============================================================
-export async function getServiciosDestacados() {
-  const { data, error } = await supabase
-    .from(TABLAS.SERVICIOS_DESTACADOS)
-    .select('*')
-    .order('created_at');
-  if (error) throw error;
-  return data;
-}
-
 export async function updateServiciosDestacados(destacados) {
+  // Eliminar existentes
   await supabase
     .from(TABLAS.SERVICIOS_DESTACADOS)
     .delete()
     .neq('id', 0);
   
+  // Insertar nuevos con la estructura correcta
+  const nuevosDestacados = destacados.map(item => ({
+    servicio_id: item.servicioId || item.servicio_id, // 👈 Asegurar el nombre correcto
+    titulo: item.titulo || '',
+    descripcion: item.descripcion || ''
+  }));
+  
   const { error } = await supabase
     .from(TABLAS.SERVICIOS_DESTACADOS)
-    .insert(destacados);
+    .insert(nuevosDestacados);
+  
   if (error) throw error;
   return { success: true };
+}
+
+export async function getServiciosDestacados() {
+  const { data, error } = await supabase
+    .from(TABLAS.SERVICIOS_DESTACADOS)
+    .select('*')
+    .order('created_at');
+  
+  if (error) throw error;
+  
+  // Transformar servicio_id a servicioId para el frontend
+  const transformedData = data.map(item => ({
+    ...item,
+    servicioId: item.servicio_id
+  }));
+  
+  return transformedData;
 }
 
 // ============================================================
