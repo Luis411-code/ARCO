@@ -31,8 +31,9 @@ const LoginAdmin = () => {
         className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl"
       >
         <div className="text-center mb-8">
-          <div className="w-24 h-24 mx-auto overflow-hidden rounded-xl shadow-xl shadow-secondary/20 border-2 border-secondary/30 bg-white/10 backdrop-blur-sm p-2">
-            <img src="/logo.png" alt="ARCO" className="w-full h-full object-cover" />
+          {/* ===== LOGO CON FONDO BLANCO ===== */}
+          <div className="w-24 h-24 mx-auto bg-white rounded-xl p-2 shadow-xl shadow-secondary/20 border-2 border-secondary/30">
+            <img src="/logo.png" alt="ARCO" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-primary mt-4">Panel de Administración</h1>
           <p className="text-gray-500 text-sm">Accede para gestionar tu sitio web</p>
