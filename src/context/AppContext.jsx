@@ -1,5 +1,5 @@
 // src/context/AppContext.jsx
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { 
   loadAllData, 
   syncAllData,
@@ -52,20 +52,20 @@ const initialData = {
   },
   sobreNosotros: {
     titulo: 'Expertos en Comunicación Visual',
-    descripcion: 'En ARCO transformamos ideas en soluciones gráficas de alto impacto.',
-    mision: 'Transformar las ideas de nuestros clientes en soluciones visuales de alto impacto.',
-    historia: 'ARCO nace en Holguín con la misión de ofrecer soluciones integrales en artes gráficas.',
+    descripcion: 'En ARCO transformamos ideas en soluciones gráficas de alto impacto. Con años de experiencia en el sector, ofrecemos productos de calidad con garantía de un año.',
+    mision: 'Transformar las ideas de nuestros clientes en soluciones visuales de alto impacto, combinando creatividad, calidad y tecnología para superar sus expectativas.',
+    historia: 'ARCO nace en Holguín con la misión de ofrecer soluciones integrales en artes gráficas y comunicación visual.',
     valores: [
-      { icono: '🎨', titulo: 'Diseño Creativo', descripcion: 'Convertimos tus ideas en diseños únicos.' },
-      { icono: '🔧', titulo: 'Calidad Garantizada', descripcion: 'Materiales de primera calidad. Garantía de 1 año.' },
-      { icono: '📦', titulo: 'Soluciones Integrales', descripcion: 'Desde el diseño hasta la instalación.' }
+      { icono: '🎨', titulo: 'Diseño Creativo', descripcion: 'Convertimos tus ideas en diseños únicos que capturan la esencia de tu marca.' },
+      { icono: '🔧', titulo: 'Calidad Garantizada', descripcion: 'Materiales de primera calidad: PVC, acrílico y vinilo autoadhesivo. Garantía de 1 año.' },
+      { icono: '📦', titulo: 'Soluciones Integrales', descripcion: 'Desde el diseño hasta la instalación, ofrecemos un servicio completo y personalizado.' }
     ]
   },
   serviciosDestacados: [
-    { icono: '💡', titulo: 'Cartelería Lumínica', descripcion: 'Carteles con iluminación LED.', link: '/servicios' },
-    { icono: '🪧', titulo: 'Cartelería No Lumínica', descripcion: 'Carteles identificativos y señalética.', link: '/servicios' },
-    { icono: '🖨️', titulo: 'Impresión y Serigrafía', descripcion: 'Gigantografías y serigrafía.', link: '/servicios' },
-    { icono: '🔧', titulo: 'Levantamiento y Montaje', descripcion: 'Instalación y mantenimiento.', link: '/servicios' }
+    { icono: '💡', titulo: 'Cartelería Lumínica', descripcion: 'Carteles con iluminación LED de bajo consumo, larga durabilidad y alta visibilidad.', link: '/servicios' },
+    { icono: '🪧', titulo: 'Cartelería No Lumínica', descripcion: 'Carteles identificativos, señalética y rótulos para interiores y exteriores con materiales de alta resistencia.', link: '/servicios' },
+    { icono: '🖨️', titulo: 'Impresión y Serigrafía', descripcion: 'Gigantografías, pendones, doyles, posavasos, cartas menú y serigrafía sobre textiles.', link: '/servicios' },
+    { icono: '🔧', titulo: 'Levantamiento y Montaje', descripcion: 'Levantamiento, diseño, instalación, mantenimiento y ambientación de interiores y exteriores.', link: '/servicios' }
   ],
   servicios: [],
   testimonios: [],
@@ -160,7 +160,10 @@ export const AppProvider = ({ children }) => {
     localStorage.setItem('arco_mensajes', JSON.stringify(mensajes));
   }, [mensajes]);
 
-  // ===== FUNCIONES LOCALES =====
+  // ============================================================
+  //  FUNCIONES LOCALES (actualización de estado)
+  // ============================================================
+  
   const updateConfiguracionLocal = (data) => {
     setConfiguracion({ ...configuracion, ...data });
   };
@@ -177,7 +180,7 @@ export const AppProvider = ({ children }) => {
     setServiciosDestacados(data);
   };
 
-  const addServicio = (servicio) => {
+  const addServicioLocal = (servicio) => {
     const newId = Date.now().toString();
     setServicios([...servicios, { ...servicio, id: newId }]);
   };
@@ -246,7 +249,7 @@ export const AppProvider = ({ children }) => {
   // ============================================================
 
   // ===== CARGAR DATOS DESDE SUPABASE =====
-  const loadFromSupabase = async () => {
+  const loadFromSupabase = useCallback(async () => {
     try {
       setCargando(true);
       const data = await loadAllData();
@@ -262,6 +265,7 @@ export const AppProvider = ({ children }) => {
       const pendientes = await getTestimoniosPendientes();
       setTestimoniosPendientes(pendientes);
       
+      console.log('✅ Datos cargados desde Supabase correctamente');
       return { success: true, data };
     } catch (error) {
       console.error('❌ Error cargando desde Supabase:', error);
@@ -269,10 +273,10 @@ export const AppProvider = ({ children }) => {
     } finally {
       setCargando(false);
     }
-  };
+  }, []);
 
   // ===== SINCRONIZAR DATOS A SUPABASE =====
-  const syncToSupabase = async () => {
+  const syncToSupabase = useCallback(async () => {
     try {
       setCargando(true);
       
@@ -287,6 +291,7 @@ export const AppProvider = ({ children }) => {
       };
       
       const result = await syncAllData(data);
+      console.log('✅ Datos sincronizados a Supabase correctamente');
       return { success: true, result };
     } catch (error) {
       console.error('❌ Error sincronizando a Supabase:', error);
@@ -294,33 +299,33 @@ export const AppProvider = ({ children }) => {
     } finally {
       setCargando(false);
     }
-  };
+  }, [configuracion, hero, sobreNosotros, serviciosDestacados, servicios, testimonios]);
 
   // ===== FUNCIONES CON SUPABASE (CRUD) =====
   
-  const guardarMensaje = async (mensaje) => {
+  const guardarMensaje = useCallback(async (mensaje) => {
     try {
       const nuevo = await createMensaje(mensaje);
-      setMensajes([nuevo, ...mensajes]);
+      setMensajes(prev => [nuevo, ...prev]);
       return { success: true, data: nuevo };
     } catch (error) {
       console.error('❌ Error guardando mensaje:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const guardarTestimonioPendiente = async (testimonio) => {
+  const guardarTestimonioPendiente = useCallback(async (testimonio) => {
     try {
       const nuevo = await createTestimonioPendiente(testimonio);
-      setTestimoniosPendientes([nuevo, ...testimoniosPendientes]);
+      setTestimoniosPendientes(prev => [nuevo, ...prev]);
       return { success: true, data: nuevo };
     } catch (error) {
       console.error('❌ Error guardando testimonio:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const aprobarTestimonioConSupabase = async (id) => {
+  const aprobarTestimonioConSupabase = useCallback(async (id) => {
     try {
       await aprobarTestimonio(id);
       // Recargar listas
@@ -335,9 +340,9 @@ export const AppProvider = ({ children }) => {
       console.error('❌ Error aprobando testimonio:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const rechazarTestimonioConSupabase = async (id) => {
+  const rechazarTestimonioConSupabase = useCallback(async (id) => {
     try {
       await rechazarTestimonio(id);
       const pendientes = await getTestimoniosPendientes();
@@ -347,9 +352,9 @@ export const AppProvider = ({ children }) => {
       console.error('❌ Error rechazando testimonio:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const eliminarTestimonioConSupabase = async (id) => {
+  const eliminarTestimonioConSupabase = useCallback(async (id) => {
     try {
       await deleteTestimonio(id);
       const aprobados = await getTestimonios(true);
@@ -359,77 +364,77 @@ export const AppProvider = ({ children }) => {
       console.error('❌ Error eliminando testimonio:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const marcarMensajeLeido = async (id) => {
+  const marcarMensajeLeido = useCallback(async (id) => {
     try {
       await marcarLeido(id);
-      setMensajes(mensajes.map(m => m.id === id ? { ...m, leido: true } : m));
+      setMensajes(prev => prev.map(m => m.id === id ? { ...m, leido: true } : m));
       return { success: true };
     } catch (error) {
       console.error('❌ Error marcando mensaje como leído:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const marcarMensajeRespondido = async (id) => {
+  const marcarMensajeRespondido = useCallback(async (id) => {
     try {
       await marcarRespondido(id);
-      setMensajes(mensajes.map(m => m.id === id ? { ...m, respondido: true } : m));
+      setMensajes(prev => prev.map(m => m.id === id ? { ...m, respondido: true } : m));
       return { success: true };
     } catch (error) {
       console.error('❌ Error marcando mensaje como respondido:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const eliminarMensajeConSupabase = async (id) => {
+  const eliminarMensajeConSupabase = useCallback(async (id) => {
     try {
       await deleteMensaje(id);
-      setMensajes(mensajes.filter(m => m.id !== id));
+      setMensajes(prev => prev.filter(m => m.id !== id));
       return { success: true };
     } catch (error) {
       console.error('❌ Error eliminando mensaje:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
   // ===== FUNCIONES PARA SERVICIOS CON SUPABASE =====
-  const agregarServicio = async (servicio) => {
+  const agregarServicio = useCallback(async (servicio) => {
     try {
       const nuevo = await createServicio(servicio);
-      setServicios([nuevo, ...servicios]);
+      setServicios(prev => [nuevo, ...prev]);
       return { success: true, data: nuevo };
     } catch (error) {
       console.error('❌ Error agregando servicio:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const actualizarServicio = async (id, data) => {
+  const actualizarServicio = useCallback(async (id, data) => {
     try {
       const actualizado = await updateServicio(id, data);
-      setServicios(servicios.map(s => s.id === id ? actualizado : s));
+      setServicios(prev => prev.map(s => s.id === id ? actualizado : s));
       return { success: true, data: actualizado };
     } catch (error) {
       console.error('❌ Error actualizando servicio:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const eliminarServicio = async (id) => {
+  const eliminarServicio = useCallback(async (id) => {
     try {
       await deleteServicioDB(id);
-      setServicios(servicios.filter(s => s.id !== id));
+      setServicios(prev => prev.filter(s => s.id !== id));
       return { success: true };
     } catch (error) {
       console.error('❌ Error eliminando servicio:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
   // ===== FUNCIONES DE CONFIGURACIÓN CON SUPABASE =====
-  const actualizarConfiguracion = async (data) => {
+  const actualizarConfiguracion = useCallback(async (data) => {
     try {
       const actualizado = await updateConfiguracion(data);
       setConfiguracion(actualizado);
@@ -438,9 +443,9 @@ export const AppProvider = ({ children }) => {
       console.error('❌ Error actualizando configuración:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const actualizarHero = async (data) => {
+  const actualizarHero = useCallback(async (data) => {
     try {
       const actualizado = await updateHero(data);
       setHero(actualizado);
@@ -449,23 +454,20 @@ export const AppProvider = ({ children }) => {
       console.error('❌ Error actualizando hero:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const actualizarSobreNosotros = async (data) => {
+  const actualizarSobreNosotros = useCallback(async (data) => {
     try {
-      await updateSobreNosotrosDB(data);
-      if (data.valores) {
-        await updateValores(data.valores);
-      }
+      const result = await updateSobreNosotrosDB(data);
       setSobreNosotros(data);
       return { success: true };
     } catch (error) {
       console.error('❌ Error actualizando sobre nosotros:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const actualizarServiciosDestacados = async (data) => {
+  const actualizarServiciosDestacados = useCallback(async (data) => {
     try {
       await updateServiciosDestacados(data);
       setServiciosDestacados(data);
@@ -474,7 +476,11 @@ export const AppProvider = ({ children }) => {
       console.error('❌ Error actualizando servicios destacados:', error);
       return { success: false, error: error.message };
     }
-  };
+  }, []);
+
+  // ============================================================
+  //  EXPORTAR VALORES
+  // ============================================================
 
   const value = {
     // ===== DATOS =====
@@ -499,7 +505,7 @@ export const AppProvider = ({ children }) => {
     updateHero: updateHeroLocal,
     updateSobreNosotros: updateSobreNosotrosLocal,
     updateServiciosDestacados: updateServiciosDestacadosLocal,
-    addServicio,
+    addServicio: addServicioLocal,
     updateServicio: updateServicioLocal,
     deleteServicio: deleteServicioLocal,
     deleteTestimonio: deleteTestimonioLocal,
