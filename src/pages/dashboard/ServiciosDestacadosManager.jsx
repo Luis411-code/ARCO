@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
 
 const ServiciosDestacadosManager = () => {
-  const { serviciosDestacados, actualizarServiciosDestacados } = useAppContext();
+  const { serviciosDestacados, actualizarServiciosDestacados, loadFromSupabase } = useAppContext();
   const [success, setSuccess] = useState(false);
   const [items, setItems] = useState(serviciosDestacados);
 
@@ -14,10 +14,19 @@ const ServiciosDestacadosManager = () => {
     setItems(newItems);
   };
 
+  // 👇 FUNCIÓN PARA ELIMINAR UN SERVICIO DESTACADO
+  const handleDelete = (index) => {
+    if (confirm('¿Estás seguro de eliminar este servicio destacado?')) {
+      const newItems = items.filter((_, i) => i !== index);
+      setItems(newItems);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await actualizarServiciosDestacados(items);
     if (result.success) {
+      await loadFromSupabase();
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     }
@@ -40,7 +49,19 @@ const ServiciosDestacadosManager = () => {
       <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
         <form onSubmit={handleSubmit} className="space-y-6">
           {items.map((item, index) => (
-            <div key={item.id || index} className="p-4 border border-gray-200 rounded-lg">
+            <div key={item.id || index} className="p-4 border border-gray-200 rounded-lg relative">
+              {/* 👇 BOTÓN DE ELIMINAR */}
+              <button
+                type="button"
+                onClick={() => handleDelete(index)}
+                className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition-colors"
+                title="Eliminar este servicio destacado"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
               <h4 className="font-semibold text-primary mb-3">Servicio Destacado #{index + 1}</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
@@ -82,12 +103,15 @@ const ServiciosDestacadosManager = () => {
               </div>
             </div>
           ))}
-          <button
-            type="submit"
-            className="bg-gradient-to-r from-primary to-blue-700 text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-105"
-          >
-            Guardar Cambios
-          </button>
+
+          <div className="flex gap-4">
+            <button
+              type="submit"
+              className="bg-gradient-to-r from-primary to-blue-700 text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-105"
+            >
+              Guardar Cambios
+            </button>
+          </div>
         </form>
       </div>
     </div>
