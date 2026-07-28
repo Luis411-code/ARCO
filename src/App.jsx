@@ -11,8 +11,6 @@ import Presupuesto from './components/Presupuesto';
 import TestimonioForm from './components/TestimonioForm';
 import ScrollToTop from './components/ScrollToTop';
 import { useAppContext } from './context/AppContext';
-
-// 👇 IMPORTACIÓN DIRECTA (SIN LAZY)
 import Dashboard from './pages/Dashboard';
 import LoginAdmin from './pages/LoginAdmin';
 
@@ -27,7 +25,7 @@ const PublicLayout = ({ children }) => (
   </div>
 );
 
-function AppContent() {
+function App() {
   const { loadFromSupabase, setServicios } = useAppContext();
 
   useEffect(() => {
@@ -47,60 +45,52 @@ function AppContent() {
     };
 
     cargarDatos();
-  }, []);
+  }, [loadFromSupabase, setServicios]);
 
-  return (
-    <Routes>
-      {/* ===== RUTAS PÚBLICAS ===== */}
-      <Route path="/" element={
-        <PublicLayout>
-          <Home />
-          <Ubicacion />
-        </PublicLayout>
-      } />
-      
-      <Route path="/servicios" element={
-        <PublicLayout>
-          <Servicios />
-        </PublicLayout>
-      } />
-      
-      <Route path="/contacto" element={
-        <PublicLayout>
-          <Contacto />
-        </PublicLayout>
-      } />
-      
-      <Route path="/about" element={
-        <PublicLayout>
-          <About />
-        </PublicLayout>
-      } />
-      
-      <Route path="/presupuesto" element={
-        <PublicLayout>
-          <Presupuesto />
-        </PublicLayout>
-      } />
-      
-      <Route path="/testimonio" element={
-        <PublicLayout>
-          <TestimonioForm />
-        </PublicLayout>
-      } />
-
-      {/* ===== RUTAS DE ADMIN (SIN LAZY) ===== */}
-      <Route path="/admin/login" element={<LoginAdmin />} />
-      <Route path="/dashboard/*" element={<Dashboard />} />
-    </Routes>
-  );
-}
-
-function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <AppContent />
+      <Routes>
+        <Route path="/" element={
+          <PublicLayout>
+            <Home />
+            <Ubicacion />
+          </PublicLayout>
+        } />
+        
+        <Route path="/servicios" element={
+          <PublicLayout>
+            <Servicios />
+          </PublicLayout>
+        } />
+        
+        <Route path="/contacto" element={
+          <PublicLayout>
+            <Contacto />
+          </PublicLayout>
+        } />
+        
+        <Route path="/about" element={
+          <PublicLayout>
+            <About />
+          </PublicLayout>
+        } />
+        
+        <Route path="/presupuesto" element={
+          <PublicLayout>
+            <Presupuesto />
+          </PublicLayout>
+        } />
+        
+        <Route path="/testimonio" element={
+          <PublicLayout>
+            <TestimonioForm />
+          </PublicLayout>
+        } />
+
+        <Route path="/admin/login" element={<LoginAdmin />} />
+        <Route path="/dashboard/*" element={<Dashboard />} />
+      </Routes>
     </BrowserRouter>
   );
 }
