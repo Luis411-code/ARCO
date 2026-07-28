@@ -4,24 +4,14 @@ import { motion } from 'framer-motion';
 import { useAppContext } from '../../context/AppContext';
 
 const ServiciosDestacadosManager = () => {
-  const { serviciosDestacados, actualizarServiciosDestacados, loadFromSupabase } = useAppContext();
+  const { serviciosDestacados, actualizarServiciosDestacados, loadFromSupabase, servicios } = useAppContext();
   const [success, setSuccess] = useState(false);
   const [items, setItems] = useState(serviciosDestacados);
   const [showModal, setShowModal] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
-  const [formData, setFormData] = useState({
-    icono: '📋',
-    titulo: '',
-    descripcion: '',
-    link: '/servicios'
-  });
+  const [selectedServicioId, setSelectedServicioId] = useState('');
 
-  const handleChange = (index, field, value) => {
-    const newItems = [...items];
-    newItems[index][field] = value;
-    setItems(newItems);
-  };
-
+  // ===== ELIMINAR DESTACADO =====
   const handleDelete = (index) => {
     if (confirm('¿Estás seguro de eliminar este servicio destacado?')) {
       const newItems = items.filter((_, i) => i !== index);
@@ -29,50 +19,55 @@ const ServiciosDestacadosManager = () => {
     }
   };
 
-  // ===== AGREGAR NUEVO =====
+  // ===== ABRIR MODAL PARA AGREGAR =====
   const handleAdd = () => {
     setEditIndex(null);
-    setFormData({ icono: '📋', titulo: '', descripcion: '', link: '/servicios' });
+    setSelectedServicioId('');
     setShowModal(true);
   };
 
+  // ===== ABRIR MODAL PARA EDITAR =====
   const handleEdit = (index) => {
     setEditIndex(index);
-    setFormData({ ...items[index] });
+    setSelectedServicioId(items[index].servicioId || '');
     setShowModal(true);
   };
 
-  const handleFormChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSaveItem = () => {
-    if (!formData.titulo.trim()) {
-      alert('El título es obligatorio');
+  // ===== GUARDAR DESTACADO =====
+  const handleSave = () => {
+    if (!selectedServicioId) {
+      alert('Por favor, selecciona un servicio');
       return;
     }
+
+    const servicio = servicios.find(s => s.id === selectedServicioId);
+    if (!servicio) {
+      alert('Servicio no encontrado');
+      return;
+    }
+
+    const newItem = {
+      servicioId: servicio.id,
+      titulo: servicio.titulo,
+      descripcion: servicio.descripcion || '',
+      // No guardamos icono ni link
+    };
 
     if (editIndex !== null) {
       // Editar
       const newItems = [...items];
-      newItems[editIndex] = { ...formData };
+      newItems[editIndex] = newItem;
       setItems(newItems);
     } else {
       // Agregar nuevo
-      const newItem = {
-        ...formData,
-        id: Date.now().toString()
-      };
       setItems([...items, newItem]);
     }
 
     setShowModal(false);
-    setFormData({ icono: '📋', titulo: '', descripcion: '', link: '/servicios' });
+    setSelectedServicioId('');
   };
 
+  // ===== GUARDAR CAMBIOS =====
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await actualizarServiciosDestacados(items);
@@ -83,15 +78,23 @@ const ServiciosDestacadosManager = () => {
     }
   };
 
+  // ===== OBTENER SERVICIOS NO DESTACADOS =====
+  const serviciosNoDestacados = servicios.filter(
+    s => !items.some(item => item.servicioId === s.id)
+  );
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-primary">🎯 Servicios Destacados (Home)</h2>
         <button
           onClick={handleAdd}
-          className="bg-gradient-to-r from-primary to-blue-700 text-white px-4 py-2 rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-105"
+          disabled={serviciosNoDestacados.length === 0}
+          className={`bg-gradient-to-r from-primary to-blue-700 text-white px-4 py-2 rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-105 ${
+            serviciosNoDestacados.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         >
-          + Agregar Servicio
+          + Agregar Destacado
         </button>
       </div>
 
@@ -112,71 +115,45 @@ const ServiciosDestacadosManager = () => {
               <p>No hay servicios destacados. ¡Agrega uno!</p>
             </div>
           ) : (
-            items.map((item, index) => (
-              <div key={item.id || index} className="p-4 border border-gray-200 rounded-lg relative group">
-                <div className="absolute top-2 right-2 flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleEdit(index)}
-                    className="text-blue-500 hover:text-blue-700 transition-colors"
-                    title="Editar"
-                  >
-                    ✏️
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(index)}
-                    className="text-red-500 hover:text-red-700 transition-colors"
-                    title="Eliminar"
-                  >
-                    🗑️
-                  </button>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {items.map((item, index) => {
+                const servicio = servicios.find(s => s.id === item.servicioId);
+                return (
+                  <div key={item.servicioId || index} className="p-4 border border-gray-200 rounded-lg relative group">
+                    <div className="absolute top-2 right-2 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(index)}
+                        className="text-blue-500 hover:text-blue-700 transition-colors"
+                        title="Editar"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(index)}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                        title="Eliminar"
+                      >
+                        🗑️
+                      </button>
+                    </div>
 
-                <h4 className="font-semibold text-primary mb-3 flex items-center gap-2">
-                  <span className="text-2xl">{item.icono || '📋'}</span>
-                  {item.titulo || 'Sin título'}
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Icono (emoji)</label>
-                    <input
-                      type="text"
-                      value={item.icono}
-                      onChange={(e) => handleChange(index, 'icono', e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                    />
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-primary">{item.titulo || 'Sin título'}</h4>
+                        <p className="text-sm text-gray-500 mt-1">{item.descripcion || 'Sin descripción'}</p>
+                        {servicio && (
+                          <span className="text-xs text-gray-400 mt-2 inline-block bg-gray-100 px-2 py-1 rounded">
+                            ID: {servicio.id}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
-                    <input
-                      type="text"
-                      value={item.titulo}
-                      onChange={(e) => handleChange(index, 'titulo', e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                  <textarea
-                    value={item.descripcion}
-                    onChange={(e) => handleChange(index, 'descripcion', e.target.value)}
-                    rows="2"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
-                  <input
-                    type="text"
-                    value={item.link}
-                    onChange={(e) => handleChange(index, 'link', e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                  />
-                </div>
-              </div>
-            ))
+                );
+              })}
+            </div>
           )}
 
           <button
@@ -202,49 +179,24 @@ const ServiciosDestacadosManager = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Icono (emoji)</label>
-                <input
-                  type="text"
-                  name="icono"
-                  value={formData.icono}
-                  onChange={handleFormChange}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Selecciona un servicio *</label>
+                <select
+                  value={selectedServicioId}
+                  onChange={(e) => setSelectedServicioId(e.target.value)}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                  placeholder="Ej: 💡"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
-                <input
-                  type="text"
-                  name="titulo"
-                  value={formData.titulo}
-                  onChange={handleFormChange}
-                  required
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                  placeholder="Nombre del servicio"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                <textarea
-                  name="descripcion"
-                  value={formData.descripcion}
-                  onChange={handleFormChange}
-                  rows="2"
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                  placeholder="Breve descripción"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
-                <input
-                  type="text"
-                  name="link"
-                  value={formData.link}
-                  onChange={handleFormChange}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                  placeholder="/servicios"
-                />
+                >
+                  <option value="">-- Selecciona --</option>
+                  {(editIndex !== null ? servicios : serviciosNoDestacados).map((servicio) => (
+                    <option key={servicio.id} value={servicio.id}>
+                      {servicio.titulo}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-400 mt-1">
+                  {editIndex !== null 
+                    ? 'Puedes cambiar el servicio destacado' 
+                    : 'Solo aparecen servicios no destacados'}
+                </p>
               </div>
             </div>
 
@@ -258,7 +210,7 @@ const ServiciosDestacadosManager = () => {
               </button>
               <button
                 type="button"
-                onClick={handleSaveItem}
+                onClick={handleSave}
                 className="flex-1 bg-gradient-to-r from-primary to-blue-700 text-white px-4 py-2 rounded-lg font-semibold hover:shadow-lg transition-all"
               >
                 {editIndex !== null ? 'Actualizar' : 'Agregar'}

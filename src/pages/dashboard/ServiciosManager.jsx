@@ -296,11 +296,11 @@ const ServiciosManager = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Icono</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campos</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Imágenes</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
@@ -313,14 +313,31 @@ const ServiciosManager = () => {
                     className="hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-4 text-sm text-gray-500">{index + 1}</td>
-                    <td className="px-6 py-4 text-2xl">{servicio.icono || '📋'}</td>
                     <td className="px-6 py-4 font-medium text-gray-900">{servicio.titulo}</td>
-                    <td className="px-6 py-4 text-gray-600">{servicio.categoria}</td>
-                    <td className="px-6 py-4 text-gray-600">{servicio.precio}</td>
+                    <td className="px-6 py-4 text-gray-600">
+                      <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
+                        {servicio.categoria || 'General'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{servicio.precio || 'Consultar'}</td>
                     <td className="px-6 py-4">
                       <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                         {servicio.campos_formulario?.length || 0} campos
                       </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {servicio.imagenes && servicio.imagenes.length > 0 ? (
+                        <div className="flex gap-1">
+                          {servicio.imagenes.slice(0, 2).map((img, idx) => (
+                            <img key={idx} src={img} alt="" className="w-8 h-8 rounded object-cover" loading="lazy" />
+                          ))}
+                          {servicio.imagenes.length > 2 && (
+                            <span className="text-xs text-gray-400">+{servicio.imagenes.length - 2}</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-xs">Sin imágenes</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
@@ -376,28 +393,16 @@ const ServiciosManager = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
-                  <input
-                    type="text"
-                    name="titulo"
-                    value={formData.titulo}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Icono (emoji)</label>
-                  <input
-                    type="text"
-                    name="icono"
-                    value={formData.icono}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
+                <input
+                  type="text"
+                  name="titulo"
+                  value={formData.titulo}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
+                />
               </div>
 
               <div>
@@ -440,10 +445,13 @@ const ServiciosManager = () => {
                     <option value="Papelería">Papelería</option>
                     <option value="Decoración">Decoración</option>
                     <option value="Montaje">Montaje</option>
+                    <option value="Otros">Otros</option>
                   </select>
+                  <p className="text-xs text-gray-400 mt-1">Puedes agregar nuevas categorías editando el código</p>
                 </div>
               </div>
 
+              {/* IMÁGENES */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Imágenes</label>
                 <input
@@ -486,6 +494,7 @@ const ServiciosManager = () => {
                 </div>
               )}
 
+              {/* ===== CAMPOS DEL FORMULARIO ===== */}
               <div className="border-t border-gray-200 pt-4">
                 <button
                   type="button"
@@ -623,6 +632,7 @@ const ServiciosManager = () => {
                 )}
               </div>
 
+              {/* BOTONES */}
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"

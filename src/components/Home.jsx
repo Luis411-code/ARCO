@@ -53,9 +53,9 @@ const Home = () => {
 
   return (
     <div className="overflow-hidden">
-      {/* 👇 Hero ahora usa los datos del contexto */}
       <HeroVisualLite />
 
+      {/* ===== SECCIÓN "SOBRE NOSOTROS" ===== */}
       <section className="py-20 bg-white" ref={ref}>
         <div className="container mx-auto px-4">
           <motion.div
@@ -130,6 +130,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* ===== SERVICIOS DESTACADOS ===== */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <motion.div
@@ -151,33 +152,40 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {destacados.length > 0 ? (
-              destacados.map((service, index) => (
-                <motion.div
-                  key={service.id || index}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  variants={scaleUp}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 group"
-                >
-                  <div className="bg-gradient-to-br from-primary to-blue-700 w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
-                    <span className="text-white">{service.icono}</span>
-                  </div>
-                  <h3 className="text-lg font-bold text-primary mb-2">{service.titulo}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{service.descripcion}</p>
-                  <Link to={service.link || '/servicios'} className="text-secondary font-semibold text-sm inline-flex items-center gap-1 mt-3 hover:gap-2 transition-all">
-                    Saber más →
-                  </Link>
-                </motion.div>
-              ))
+              destacados.map((item, index) => {
+                // Buscar el servicio completo por ID
+                const servicio = servicios.find(s => s.id === item.servicioId);
+                if (!servicio) return null;
+                
+                return (
+                  <motion.div
+                    key={item.servicioId || index}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={scaleUp}
+                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                    className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 group"
+                  >
+                    <div className="bg-gradient-to-br from-primary to-blue-700 w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
+                      <span className="text-white">{servicio.icono || '📋'}</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-primary mb-2">{servicio.titulo}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">{servicio.descripcion || item.descripcion}</p>
+                    <Link to={`/presupuesto?servicio=${servicio.id}`} className="text-secondary font-semibold text-sm inline-flex items-center gap-1 mt-3 hover:gap-2 transition-all">
+                      Solicitar →
+                    </Link>
+                  </motion.div>
+                );
+              })
             ) : (
-              <p className="text-gray-500 text-center col-span-full">Cargando servicios destacados...</p>
+              <p className="text-gray-500 text-center col-span-full">No hay servicios destacados</p>
             )}
           </div>
         </div>
       </section>
 
+      {/* ===== TESTIMONIOS ===== */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <motion.div
@@ -245,6 +253,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* ===== CTA FINAL ===== */}
       <section className="py-16 bg-gradient-to-r from-primary to-blue-800">
         <div className="container mx-auto px-4 text-center">
           <motion.div

@@ -60,12 +60,7 @@ const initialData = {
       { icono: '📦', titulo: 'Soluciones Integrales', descripcion: 'Desde el diseño hasta la instalación, ofrecemos un servicio completo y personalizado.' }
     ]
   },
-  serviciosDestacados: [
-    { icono: '💡', titulo: 'Cartelería Lumínica', descripcion: 'Carteles con iluminación LED de bajo consumo, larga durabilidad y alta visibilidad.', link: '/servicios' },
-    { icono: '🪧', titulo: 'Cartelería No Lumínica', descripcion: 'Carteles identificativos, señalética y rótulos para interiores y exteriores con materiales de alta resistencia.', link: '/servicios' },
-    { icono: '🖨️', titulo: 'Impresión y Serigrafía', descripcion: 'Gigantografías, pendones, doyles, posavasos, cartas menú y serigrafía sobre textiles.', link: '/servicios' },
-    { icono: '🔧', titulo: 'Levantamiento y Montaje', descripcion: 'Levantamiento, diseño, instalación, mantenimiento y ambientación de interiores y exteriores.', link: '/servicios' }
-  ],
+  serviciosDestacados: [],
   servicios: [],
   testimonios: [],
   testimoniosPendientes: [],
