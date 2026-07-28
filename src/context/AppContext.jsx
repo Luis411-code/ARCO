@@ -438,6 +438,7 @@ export const AppProvider = ({ children }) => {
 
   const actualizarSobreNosotros = useCallback(async (data) => {
     try {
+      // data contiene: { titulo, descripcion, mision, historia, valores: [...] }
       const result = await updateSobreNosotrosDB(data);
       setSobreNosotros(data);
       return { success: true };
