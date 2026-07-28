@@ -1,20 +1,9 @@
 // src/services/supabaseClient.js
 import { createClient } from '@supabase/supabase-js';
 
-// ===== CREDENCIALES DE SUPABASE =====
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://vjgmoyfbpvwdfyefifyf.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_ri_xlI-lE51RHV8vZlRBHA_O9bK9qa0';
 
-// ✅ Verificar que las variables existen
-if (!supabaseUrl) {
-  console.error('❌ VITE_SUPABASE_URL no está definida');
-}
-
-if (!supabaseAnonKey) {
-  console.error('❌ VITE_SUPABASE_ANON_KEY no está definida');
-}
-
-// ===== CREAR CLIENTE =====
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
@@ -22,7 +11,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-// ===== NOMBRES DE TABLAS =====
 export const TABLAS = {
   CONFIGURACION: 'configuracion',
   HERO: 'hero',
@@ -35,7 +23,10 @@ export const TABLAS = {
   MENSAJES: 'mensajes'
 };
 
-// ===== HELPER PARA URL DE ARCHIVOS =====
+export const BUCKETS = {
+  IMAGENES: 'arco-imagenes' // 👈 Debe existir en Supabase Storage
+};
+
 export function getPublicUrl(bucket, path) {
   if (!path) return null;
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
