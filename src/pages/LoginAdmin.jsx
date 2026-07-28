@@ -4,18 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const LoginAdmin = () => {
-  const [credentials, setCredentials] = useState({
-    email: '',
-    password: ''
-  });
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value
-    });
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e) => {
@@ -44,11 +38,7 @@ const LoginAdmin = () => {
           <p className="text-gray-500 text-sm">Accede para gestionar tu sitio web</p>
         </div>
 
-        {error && (
-          <div className="bg-red-50 text-red-700 p-3 rounded-lg mb-4 text-sm">
-            ❌ {error}
-          </div>
-        )}
+        {error && <div className="bg-red-50 text-red-700 p-3 rounded-lg mb-4 text-sm">❌ {error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -60,7 +50,7 @@ const LoginAdmin = () => {
               onChange={handleInputChange}
               required
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
-              
+              placeholder="admin@arco.cu"
             />
           </div>
           <div>
@@ -83,7 +73,7 @@ const LoginAdmin = () => {
           </button>
         </form>
 
-        
+        <p className="text-xs text-gray-400 text-center mt-4">Credenciales: admin@arco.cu / admin123</p>
       </motion.div>
     </div>
   );

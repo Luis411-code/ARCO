@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+
+// 👇 IMPORTS CORRECTOS - USANDO RUTAS RELATIVAS
 import Sidebar from './dashboard/Sidebar';
 import HeaderDashboard from './dashboard/HeaderDashboard';
 import Statistics from './dashboard/Statistics';
@@ -12,6 +14,7 @@ import MensajesManager from './dashboard/MensajesManager';
 import HeroManager from './dashboard/HeroManager';
 import SobreNosotrosManager from './dashboard/SobreNosotrosManager';
 import ServiciosDestacadosManager from './dashboard/ServiciosDestacadosManager';
+
 import { useAppContext } from '../context/AppContext';
 
 const Dashboard = () => {
