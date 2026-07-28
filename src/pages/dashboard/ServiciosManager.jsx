@@ -5,7 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import { uploadImage } from '../../services/supabaseService';
 
 const ServiciosManager = () => {
-  const { servicios, agregarServicio, actualizarServicio, eliminarServicio } = useAppContext();
+  const { servicios, agregarServicio, actualizarServicio, eliminarServicio, configuracion } = useAppContext();
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [imagenesPreview, setImagenesPreview] = useState([]);
@@ -20,6 +20,12 @@ const ServiciosManager = () => {
     imagenes: [],
     campos_formulario: []
   });
+
+  // ===== OBTENER CATEGORÍAS DE LA CONFIGURACIÓN =====
+  const categoriasDisponibles = configuracion?.categorias || [
+    'Cartelería', 'Impresión', 'Diseño', 'Rotulación',
+    'Promocionales', 'Exhibición', 'Papelería', 'Decoración', 'Montaje', 'Otros'
+  ];
 
   // ===== SUBIR IMAGEN A SUPABASE =====
   const subirImagen = async (file) => {
@@ -436,18 +442,11 @@ const ServiciosManager = () => {
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
                   >
-                    <option value="Cartelería">Cartelería</option>
-                    <option value="Impresión">Impresión</option>
-                    <option value="Diseño">Diseño</option>
-                    <option value="Rotulación">Rotulación</option>
-                    <option value="Promocionales">Promocionales</option>
-                    <option value="Exhibición">Exhibición</option>
-                    <option value="Papelería">Papelería</option>
-                    <option value="Decoración">Decoración</option>
-                    <option value="Montaje">Montaje</option>
-                    <option value="Otros">Otros</option>
+                    {categoriasDisponibles.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
                   </select>
-                  <p className="text-xs text-gray-400 mt-1">Puedes agregar nuevas categorías editando el código</p>
+                  <p className="text-xs text-gray-400 mt-1">Las categorías se gestionan en el panel de Categorías</p>
                 </div>
               </div>
 

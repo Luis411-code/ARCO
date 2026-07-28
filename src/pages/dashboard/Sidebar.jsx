@@ -11,6 +11,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
     { id: 'testimonios', icon: '💬', label: 'Testimonios' },
     { id: 'nosotros', icon: 'ℹ️', label: 'Sobre Nosotros' },
     { id: 'mensajes', icon: '✉️', label: 'Mensajes' },
+    { id: 'categorias', icon: '🏷️', label: 'Categorías' },
     { id: 'configuracion', icon: '⚙️', label: 'Configuración' },
   ];
 

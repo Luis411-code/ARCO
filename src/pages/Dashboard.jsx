@@ -2,8 +2,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-
-// 👇 IMPORTS CORRECTOS - USANDO RUTAS RELATIVAS
 import Sidebar from './dashboard/Sidebar';
 import HeaderDashboard from './dashboard/HeaderDashboard';
 import Statistics from './dashboard/Statistics';
@@ -14,7 +12,7 @@ import MensajesManager from './dashboard/MensajesManager';
 import HeroManager from './dashboard/HeroManager';
 import SobreNosotrosManager from './dashboard/SobreNosotrosManager';
 import ServiciosDestacadosManager from './dashboard/ServiciosDestacadosManager';
-
+import CategoriasManager from './dashboard/CategoriasManager';
 import { useAppContext } from '../context/AppContext';
 
 const Dashboard = () => {
@@ -107,6 +105,8 @@ const Dashboard = () => {
         return <ServiciosDestacadosManager key={key} />;
       case 'servicios':
         return <ServiciosManager key={key} />;
+      case 'categorias':
+        return <CategoriasManager key={key} />;
       case 'testimonios':
         return <TestimoniosManager key={key} />;
       case 'nosotros':

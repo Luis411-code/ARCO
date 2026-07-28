@@ -39,7 +39,19 @@ const initialData = {
     email: 'info@arco.cu',
     horario: 'Lun - Vie: 8:00 AM - 6:00 PM',
     admin_email: 'admin@arco.cu',
-    admin_password: 'admin123'
+    admin_password: 'admin123',
+    categorias: [
+      'Cartelería',
+      'Impresión',
+      'Diseño',
+      'Rotulación',
+      'Promocionales',
+      'Exhibición',
+      'Papelería',
+      'Decoración',
+      'Montaje',
+      'Otros'
+    ]
   },
   hero: {
     titulo: 'Transformamos tus',
@@ -433,7 +445,6 @@ export const AppProvider = ({ children }) => {
 
   const actualizarSobreNosotros = useCallback(async (data) => {
     try {
-      // data contiene: { titulo, descripcion, mision, historia, valores: [...] }
       const result = await updateSobreNosotrosDB(data);
       setSobreNosotros(data);
       return { success: true };
